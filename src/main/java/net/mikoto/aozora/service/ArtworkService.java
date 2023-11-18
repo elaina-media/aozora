@@ -1,6 +1,7 @@
 package net.mikoto.aozora.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import net.mikoto.aozora.model.AozoraConfig;
 import net.mikoto.aozora.model.Artwork;
 
 /**
@@ -9,5 +10,6 @@ import net.mikoto.aozora.model.Artwork;
  * Create for aozora
  */
 public interface ArtworkService extends IService<Artwork> {
+    Artwork getRemoteArtwork(int artworkId, String sessionId, boolean isLog);
     Artwork getRemoteArtwork(int artworkId);
 }

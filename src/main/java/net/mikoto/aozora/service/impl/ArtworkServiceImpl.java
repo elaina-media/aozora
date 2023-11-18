@@ -1,21 +1,21 @@
 package net.mikoto.aozora.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dtflys.forest.exceptions.ForestNetworkException;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import net.mikoto.aozora.client.PixivClient;
 import net.mikoto.aozora.mapper.ArtworkMapper;
+import net.mikoto.aozora.model.AozoraConfig;
 import net.mikoto.aozora.model.Artwork;
 import net.mikoto.aozora.service.ArtworkService;
-import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringJoiner;
@@ -29,6 +29,7 @@ import java.util.StringJoiner;
 @Log
 public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> implements ArtworkService {
     private final PixivClient pixivClient;
+    private final AozoraConfig defaultConfig;
     /**
      * Pixiv usual date format.
      * <p>
@@ -38,23 +39,59 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
      */
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
     private static final String PIXIV_IMAGE_URL = "https://i.pximg.net";
+    private static int sessionIdCount = 0;
+    private static int getCount = 0;
     @Autowired
-    public ArtworkServiceImpl(PixivClient pixivClient) {
+    public ArtworkServiceImpl(PixivClient pixivClient, AozoraConfig defaultConfig) {
         this.pixivClient = pixivClient;
+        this.defaultConfig = defaultConfig;
     }
 
+    @SneakyThrows
     @Override
     public Artwork getRemoteArtwork(int artworkId) {
-        String rawData;
+        // 计数器刷新&归零&切换SessionId
+        getCount++;
+        if (getCount >= 10) {
+            getCount = 0;
+            sessionIdCount++;
+            if (sessionIdCount >= defaultConfig.getPhpSessionId().length) {
+                sessionIdCount = 0;
+            }
+        }
+
+        Artwork artwork;
         try {
-            rawData = pixivClient.getArtwork(artworkId, "PHPSESSID=85113018_Sov80xYOtoZIsKB2D8aUv36bxD9pljL3");
+            artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount], defaultConfig.isLog());
         } catch (ForestNetworkException e) {
             if (e.getStatusCode() == 404) {
                 return null;
+            } else if (e.getStatusCode() == 429) {
+                log.info(
+                        "The session id temporary unavailable: " +
+                                defaultConfig.getPhpSessionId()[sessionIdCount] +
+                                " at artwork id :" +
+                                artworkId
+                );
+                sessionIdCount++;
+                if (sessionIdCount >= defaultConfig.getPhpSessionId().length) {
+                    sessionIdCount = 0;
+                }
+                Thread.sleep(60000);
+                log.info("Restart patch with: " + defaultConfig.getPhpSessionId()[sessionIdCount]);
+                artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount], defaultConfig.isLog());
             } else {
                 throw e;
             }
         }
+
+        return artwork;
+    }
+
+    @SneakyThrows
+    @Override
+    public Artwork getRemoteArtwork(int artworkId, String sessionId, boolean isLog) {
+        String rawData = pixivClient.getArtwork(artworkId, "PHPSESSID=" + sessionId);
         JSONObject artworkRawData = JSON.parseObject(rawData);
 
         if (artworkRawData.getBooleanValue("error")) {
@@ -74,62 +111,54 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
         artwork.setBookmarkCount(artworkBodyRawData.getIntValue("bookmarkCount"));
         artwork.setLikeCount(artworkBodyRawData.getIntValue("likeCount"));
         artwork.setLikeCount(artworkBodyRawData.getIntValue("viewCount"));
-        Date createTime, updateTime;
-        try {
-            createTime = DATE_FORMAT.parse(artworkBodyRawData.getString("createDate"));
-            updateTime = DATE_FORMAT.parse(artworkBodyRawData.getString("uploadDate"));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        // 时间
+        Date createTime = DATE_FORMAT.parse(artworkBodyRawData.getString("createDate"));
+        Date updateTime = DATE_FORMAT.parse(artworkBodyRawData.getString("uploadDate"));
         artwork.setCreateTime(createTime);
         artwork.setUpdateTime(updateTime);
         artwork.setPatchTime(new Date());
         // 链接
-        artwork.setIllustUrlMini(artworkBodyRawData.getJSONObject("urls").getString("mini").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlOriginal(artworkBodyRawData.getJSONObject("urls").getString("original").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlRegular(artworkBodyRawData.getJSONObject("urls").getString("regular").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlThumb(artworkBodyRawData.getJSONObject("urls").getString("thumb").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlSmall(artworkBodyRawData.getJSONObject("urls").getString("small").replace(PIXIV_IMAGE_URL, ""));
-
-        // 标签及年龄分级
+        JSONObject urls = artworkBodyRawData.getJSONObject("urls");
+        artwork.setIllustUrlMini(urls.getString("mini").replace(PIXIV_IMAGE_URL, ""));
+        artwork.setIllustUrlOriginal(urls.getString("original").replace(PIXIV_IMAGE_URL, ""));
+        artwork.setIllustUrlRegular(urls.getString("regular").replace(PIXIV_IMAGE_URL, ""));
+        artwork.setIllustUrlThumb(urls.getString("thumb").replace(PIXIV_IMAGE_URL, ""));
+        artwork.setIllustUrlSmall(urls.getString("small").replace(PIXIV_IMAGE_URL, ""));
+        // 年龄分级
         Artwork.Grading grading = Artwork.Grading.General;
-
+        // 标签
         StringJoiner tags = new StringJoiner(";");
-        for (int i = 0;
-             i <
-                     artworkBodyRawData
-                             .getJSONObject("tags")
-                             .getJSONArray("tags")
-                             .size();
-             i++) {
-            String tag =
-                    artworkBodyRawData.getJSONObject("tags")
-                            .getJSONArray("tags")
-                            .getJSONObject(i)
-                            .getString("tag");
+        JSONArray tagsArray = artworkBodyRawData
+                .getJSONObject("tags")
+                .getJSONArray("tags");
+        for (int i = 0; i < tagsArray.size(); i++) {
+            String tag = tagsArray.getJSONObject(i).getString("tag");
+            // 年龄分级判断
             if ("R-18".equals(tag)) {
                 grading = Artwork.Grading.R18;
             } else if ("R-18G".equals(tag)) {
                 grading = Artwork.Grading.R18G;
             }
 
+            // 标签收集
             tags.add(tag);
         }
         artwork.setGrading(grading);
         artwork.setTags(tags.toString());
 
-        // 处理系列作品数据
+        // 系列作品数据
         JSONObject seriesJson = artworkRawData.getJSONObject("seriesNavData");
 
         artwork.setHasSeries(seriesJson != null);
         if (!artwork.isHasSeries()) {
-            log.info("[Aozora] Get Artwork: " + artwork.getArtworkId());
-            log.info("[Aozora] ArtworkJson: " + JSONObject.toJSONString(artwork));
-            log.info("[Aozora] ArtworkTableId: " + (artwork.getArtworkId() % 100));
+            if (isLog) {
+                doLogArtwork(artwork);
+            }
+            Thread.sleep(500);
             return artwork;
         }
-        assert seriesJson != null;
 
+        assert seriesJson != null;
         artwork.setSeriesId(Integer.parseInt(seriesJson.getString("seriesId")));
         artwork.setSeriesOrder(seriesJson.getIntValue("order"));
 
@@ -145,9 +174,23 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
             artwork.setNextArtworkTitle(nextJson.getString("title"));
         }
 
+        if (isLog) {
+            doLogArtwork(artwork);
+        }
+        Thread.sleep(500);
+        return artwork;
+    }
+
+    private void doLogArtwork(@NotNull Artwork artwork) {
         log.info("[Aozora] Get Artwork: " + artwork.getArtworkId());
         log.info("[Aozora] ArtworkJson: " + JSONObject.toJSONString(artwork));
         log.info("[Aozora] ArtworkTableId: " + (artwork.getArtworkId() % 100));
-        return artwork;
+    }
+
+    private void nextSessionId(@NotNull AozoraConfig config) {
+        sessionIdCount++;
+        if (sessionIdCount >= config.getPhpSessionId().length) {
+            sessionIdCount = 0;
+        }
     }
 }
