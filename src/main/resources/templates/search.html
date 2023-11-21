@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" class="mdui-theme-auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>Aozora-Search</title>
+    <link rel="stylesheet" href="https://unpkg.com/mdui@2.0.2/mdui.css">
+    <script src="https://unpkg.com/mdui@2.0.2/mdui.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/popper.js/2.9.3/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <style>
+        img {
+            border-radius: 10px;
+            margin-top: 10px;
+            max-height: 60%;
+            width: 90%;
+        }
+    </style>
+</head>
+<body class="mdui-theme-auto">
+<div style="width: 100%;text-align: center;margin-top: 100px">
+    <h1>Aozora</h1>
+    <p>当前数据库共有插画 <span th:text="${artworksCount}"></span>条 <small th:text="'插画总量数据获取用时: ' + ${artworksCountTime}"></small></p>
+    <form action="/search">
+        <mdui-text-field label="Search" name="keys" style="width: 37.5%">
+            <mdui-icon slot="icon" name='search--outlined' onclick="doSearch()"></mdui-icon>
+        </mdui-text-field>
+        <small th:text="'插画分页数据获取用时: ' + ${pagedArtworksCountTime}" style="position: absolute;--width: attr(width);right: calc(31.25% - var(--width));margin-top: 15px"></small>
+
+        <br><br>
+
+        <mdui-select label="排列依据" name="column" value="bookmark_count" style="width: 100px">
+            <mdui-menu-item value="bookmark_count">收藏数</mdui-menu-item>
+            <mdui-menu-item value="like_count">点赞数</mdui-menu-item>
+            <mdui-menu-item value="view_count">浏览数</mdui-menu-item>
+            <mdui-menu-item value="artwork_id">时间</mdui-menu-item>
+        </mdui-select>
+
+        <mdui-select label="排列顺序" name="type" value="desc" style="width: 100px">
+            <mdui-menu-item value="desc">从大到小</mdui-menu-item>
+            <mdui-menu-item value="asc">从小到大</mdui-menu-item>
+        </mdui-select>
+
+        <mdui-select label="年龄分级及以下" name="grading" value="0" style="width: 150px">
+            <mdui-menu-item value="0">全年龄</mdui-menu-item>
+            <mdui-menu-item value="1">成人向R18</mdui-menu-item>
+            <mdui-menu-item value="2">成人向R18G</mdui-menu-item>
+        </mdui-select>
+
+        <mdui-text-field label="页码" name="page" type="number" style="width: 100px">
+        </mdui-text-field>
+    </form>
+</div>
+<div class="row" style="width: 85%;margin: 50px auto">
+    <mdui-card clickable style="text-align: center;width: fit-content;height: fit-content;max-width: 22%;margin: 5px" th:each="artwork:${artworks}" th:href="'/artwork/' + ${artwork.getArtworkId()}">
+        <mdui-badge style="position: absolute; right: 5%; top: 10px;padding: 10px" th:text="${artwork.getGrading().name().replace('General', '全年龄')}">General</mdui-badge>
+        <img th:src="'/api/artwork/getImage?url=' + ${artwork.getIllustUrlThumb()}"/>
+        <h2 th:text="${artwork.getArtworkTitle()}">
+            Artwork_Title
+        </h2>
+        <p th:text="${artwork.getAuthorName()}">
+            Artwork_Author_name
+        </p>
+    </mdui-card>
+</div>
+
+<mdui-button style="margin-left: 7.5%;margin-bottom: 10px" id="previous-page" onclick="document.getElementsByName('page')[0].setAttribute('value', page - 1);doSearch()">上一页</mdui-button>
+<mdui-button style="margin-bottom: 10px" id="next-page" onclick="document.getElementsByName('page')[0].setAttribute('value', page + 1);doSearch()">下一页</mdui-button>
+<script>
+    let page = 1;
+    setTimeout(function () {
+        if (getQueryVariable("page").localeCompare("1") === 0 || getQueryVariable("page").localeCompare("") === 0) {
+            let previousPage = document.getElementById("previous-page");
+            let nextPage = document.getElementById("next-page");
+
+            previousPage.setAttribute("style", "display: none");
+            nextPage.setAttribute("style", "margin-left: 7.5%;margin-bottom: 10px")
+        } else {
+            page = parseInt(getQueryVariable("page"))
+        }
+
+        let grading = getQueryVariable("grading");
+        let type = getQueryVariable("type");
+        let column = getQueryVariable("column");
+        let keys = getQueryVariable("keys");
+
+        if (grading.localeCompare("") === 0) {
+            grading = 0;
+        }
+
+        if (type.localeCompare("") === 0) {
+            type = "desc";
+        }
+
+        if (column.localeCompare("") === 0) {
+            column = "bookmark_count";
+        }
+
+        document.getElementsByName("grading")[0].setAttribute("value", grading);
+        document.getElementsByName("type")[0].setAttribute("value", type);
+        document.getElementsByName("column")[0].setAttribute("value", column);
+        document.getElementsByName("keys")[0].setAttribute("value", decodeURIComponent(keys));
+        document.getElementsByName("page")[0].setAttribute("value", page);
+    }, 100)
+
+    function doSearch() {
+        const page = document.getElementsByName("page")[0].getAttribute("value");
+        const grading = document.getElementsByName("grading")[0].getAttribute("value");
+        const type = document.getElementsByName("type")[0].getAttribute("value");
+        const column = document.getElementsByName("column")[0].getAttribute("value");
+        const keys = document.getElementsByName("keys")[0].getAttribute("value");
+
+
+        window.location = "/search?page=" + page +
+            "&column=" + column +
+            "&type=" + type +
+            "&keys=" + keys +
+            "&grading=" + grading;
+    }
+
+    const query = window.location.search.substring(1);
+    const vars = query.split("&");
+    function getQueryVariable(variable) {
+        try {
+            for (let i=0; i< vars.length; i++) {
+                const pair = vars[i].split("=");
+                if(pair[0] === variable){return pair[1];}
+            }
+            return "";
+        } catch (e) {
+            return "";
+        }
+    }
+</script>
+</body>
+</html>

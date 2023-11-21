@@ -99,6 +99,14 @@ public class Artwork {
             this.grading = grading;
         }
 
+        public static Grading getGrading(int i) {
+            for (Grading g : Grading.values()) {
+                if (g.getGrading() == i) {
+                    return g;
+                }
+            }
+            throw new RuntimeException("Unsupported grading");
+        }
     }
 }
 

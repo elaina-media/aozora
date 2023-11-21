@@ -1,6 +1,9 @@
 package net.mikoto.aozora;
 
+import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.MybatisMapperRegistry;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.dtflys.forest.Forest;
 import com.dtflys.forest.config.ForestConfiguration;
@@ -23,5 +26,12 @@ public class AozoraApplicationProperties {
         ForestConfiguration configuration = Forest.config();
         configuration.setLogEnabled(false);
         return Forest.client(PixivClient.class);
+    }
+
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        return interceptor;
     }
 }

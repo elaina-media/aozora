@@ -21,5 +21,17 @@ public interface PixivClient {
     )
     String getArtwork(@Var("artworkId") int artworkId, @Var("cookie") String cookie);
 
-
+    /**
+     * Get the image from pixiv.
+     *
+     * @param url The image url.
+     * @return Result.
+     */
+    @Get(
+            url = "https://i.pximg.net{url}",
+            headers = {
+                    "Referer: https://www.pixiv.net"
+            }
+    )
+    byte[] getImage(@Var("url") String url);
 }

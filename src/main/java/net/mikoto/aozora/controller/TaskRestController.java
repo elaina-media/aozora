@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
  * Create for aozora
  */
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/api/task")
 @Log
 public class TaskRestController {
     public final TaskService taskService;

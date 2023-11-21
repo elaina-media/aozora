@@ -52,7 +52,7 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
     public Artwork getRemoteArtwork(int artworkId) {
         // 计数器刷新&归零&切换SessionId
         getCount++;
-        if (getCount >= 10) {
+        if (getCount >= 5) {
             getCount = 0;
             sessionIdCount++;
             if (sessionIdCount >= defaultConfig.getPhpSessionId().length) {
@@ -88,6 +88,11 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
         return artwork;
     }
 
+    @Override
+    public byte[] getImage(String url) {
+        return pixivClient.getImage(url);
+    }
+
     @SneakyThrows
     @Override
     public Artwork getRemoteArtwork(int artworkId, String sessionId, boolean isLog) {
@@ -110,7 +115,7 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
         artwork.setPageCount(artworkBodyRawData.getIntValue("pageCount"));
         artwork.setBookmarkCount(artworkBodyRawData.getIntValue("bookmarkCount"));
         artwork.setLikeCount(artworkBodyRawData.getIntValue("likeCount"));
-        artwork.setLikeCount(artworkBodyRawData.getIntValue("viewCount"));
+        artwork.setViewCount(artworkBodyRawData.getIntValue("viewCount"));
         // 时间
         Date createTime = DATE_FORMAT.parse(artworkBodyRawData.getString("createDate"));
         Date updateTime = DATE_FORMAT.parse(artworkBodyRawData.getString("uploadDate"));
@@ -154,7 +159,6 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
             if (isLog) {
                 doLogArtwork(artwork);
             }
-            Thread.sleep(500);
             return artwork;
         }
 
@@ -177,7 +181,6 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
         if (isLog) {
             doLogArtwork(artwork);
         }
-        Thread.sleep(500);
         return artwork;
     }
 
