@@ -78,13 +78,8 @@ public class ArtworkRestController {
             return result;
         }
         QueryWrapper<Artwork> queryWrapper = new QueryWrapper<>();
-        for (String key : keys.split(",")) {
-            queryWrapper.le("grading", grading + 1).like("tags", key);
-            queryWrapper.or();
-            queryWrapper.le("grading", grading + 1).like("artwork_title", key);
-            queryWrapper.or();
-            queryWrapper.le("grading", grading + 1).like("description", key);
-        }
+        queryWrapper.inSql("grading", "select grading where grading <= " + grading);
+        queryWrapper.like("tags", keys).or().like("artwork_title", keys);
 
         Page<Artwork> artworkPage = new Page<>(page, 12);
         artworkPage.addOrder(new OrderItem(column, "asc".equals(type)));

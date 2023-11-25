@@ -2,6 +2,7 @@ package net.mikoto.aozora.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.model.tasks.ArtworksCountUpdateTask;
 import net.mikoto.aozora.service.ArtworkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,11 +23,13 @@ public class H5Controller {
     private final ArtworkService artworkService;
     private final ArtworkRestController artworkRestController;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh-mm");
+    private final ArtworksCountUpdateTask artworksCountUpdateTask;
 
     @Autowired
-    public H5Controller(ArtworkService artworkService, ArtworkRestController artworkRestController) {
+    public H5Controller(ArtworkService artworkService, ArtworkRestController artworkRestController, ArtworksCountUpdateTask artworksCountUpdateTask) {
         this.artworkService = artworkService;
         this.artworkRestController = artworkRestController;
+        this.artworksCountUpdateTask = artworksCountUpdateTask;
     }
 
     @RequestMapping("/artwork/{artworkId}")
@@ -48,14 +51,14 @@ public class H5Controller {
                                @RequestParam(value = "type", defaultValue = "desc") String type,
                                @RequestParam(value = "grading", defaultValue = "0") int grading) {
         JSONObject result = artworkRestController.getArtworksByKeys(page, keys, column, type, grading);
-        JSONObject result2 = artworkRestController.getArtworksCount();
+//        JSONObject result2 = artworkRestController.getArtworksCount();
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("search");
         modelAndView.addObject("artworks", result.getJSONArray("body").toArray(Artwork.class));
         modelAndView.addObject("pagedArtworksCountTime", result.getString("timeCost"));
-        modelAndView.addObject("artworksCount", result2.getString("body"));
-        modelAndView.addObject("artworksCountTime", result2.getString("timeCost"));
+        modelAndView.addObject("artworksCount", artworksCountUpdateTask.getCache());
+        modelAndView.addObject("artworksCountTime", 0);
 
         return modelAndView;
     }

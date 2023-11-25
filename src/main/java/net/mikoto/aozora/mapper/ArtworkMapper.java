@@ -2,7 +2,6 @@ package net.mikoto.aozora.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import net.mikoto.aozora.model.Artwork;
-import org.springframework.stereotype.Component;
 
 /**
  * @author mikoto
