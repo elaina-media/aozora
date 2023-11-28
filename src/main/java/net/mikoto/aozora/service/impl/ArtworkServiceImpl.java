@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dtflys.forest.exceptions.ForestNetworkException;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.client.PixivClient;
@@ -41,6 +43,9 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
     private static final String PIXIV_IMAGE_URL = "https://i.pximg.net";
     private static int sessionIdCount = 0;
     private static int getCount = 0;
+    @Setter
+    @Getter
+    private int cachedArtworksCount;
     @Autowired
     public ArtworkServiceImpl(PixivClient pixivClient, AozoraConfig defaultConfig) {
         this.pixivClient = pixivClient;

@@ -23,13 +23,11 @@ public class H5Controller {
     private final ArtworkService artworkService;
     private final ArtworkRestController artworkRestController;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh-mm");
-    private final ArtworksCountUpdateTask artworksCountUpdateTask;
 
     @Autowired
-    public H5Controller(ArtworkService artworkService, ArtworkRestController artworkRestController, ArtworksCountUpdateTask artworksCountUpdateTask) {
+    public H5Controller(ArtworkService artworkService, ArtworkRestController artworkRestController) {
         this.artworkService = artworkService;
         this.artworkRestController = artworkRestController;
-        this.artworksCountUpdateTask = artworksCountUpdateTask;
     }
 
     @RequestMapping("/artwork/{artworkId}")
@@ -57,7 +55,7 @@ public class H5Controller {
         modelAndView.setViewName("search");
         modelAndView.addObject("artworks", result.getJSONArray("body").toArray(Artwork.class));
         modelAndView.addObject("pagedArtworksCountTime", result.getString("timeCost"));
-        modelAndView.addObject("artworksCount", artworksCountUpdateTask.getCache());
+        modelAndView.addObject("artworksCount", artworkService.getCachedArtworksCount());
         modelAndView.addObject("artworksCountTime", 0);
 
         return modelAndView;

@@ -56,17 +56,16 @@ public class PatchBatchArtworksTask implements Runnable {
                 totalNullWorkCount++;
                 nullWorkCount++;
             }
-            if (cache.size() < 100) {
-                doneWorkCount++;
-            } else {
+            doneWorkCount++;
+            if (cache.size() >= 100) {
                 artworkService.saveOrUpdateBatch(cache);
                 cache.clear();
                 log.info("缓存更新于: " + artworkId + " -> " + (artworkId + 100));
-                System.out.println("    总作业数：" + doneWorkCount + 1);
+                System.out.println("    总作业数：" + doneWorkCount);
                 System.out.println("    总有效作业数：" + totalNotNullWorkCount);
-                System.out.println("        占比：" + (totalNotNullWorkCount / doneWorkCount) * 100 + "%");
+                System.out.println("        占比：" + (((double) totalNotNullWorkCount / (double) doneWorkCount) * 100) + "%");
                 System.out.println("    总无效作业数：" + totalNullWorkCount);
-                System.out.println("        占比：" + (totalNullWorkCount / doneWorkCount) * 100 + "%");
+                System.out.println("        占比：" + (((double) totalNullWorkCount / (double) doneWorkCount) * 100) + "%");
                 System.out.println("    缓内作业数：" + (notNullWorkCount + nullWorkCount));
                 System.out.println("    缓内有效作业数：" + notNullWorkCount);
                 System.out.println("        占比：" + (((double) notNullWorkCount / (double) (notNullWorkCount + nullWorkCount)) * 100) + "%");

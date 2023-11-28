@@ -13,4 +13,6 @@ public interface ArtworkService extends IService<Artwork> {
     Artwork getRemoteArtwork(int artworkId, String sessionId, boolean isLog);
     Artwork getRemoteArtwork(int artworkId);
     byte[] getImage(String url);
+    int getCachedArtworksCount();
+    void setCachedArtworksCount(int artworksCount);
 }

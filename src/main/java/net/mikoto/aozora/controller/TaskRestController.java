@@ -36,29 +36,36 @@ public class TaskRestController {
     @RequestMapping("/create")
     public JSONObject createTask(
             @RequestParam String taskClassName,
-            @RequestParam @NotNull String paramTypes,
+            @RequestParam String paramTypes,
             @RequestParam String params,
             @RequestParam String requireServiceTypes) {
         Class<? extends Runnable> taskClass = Class.forName(taskClassName).asSubclass(Runnable.class);
 
-        String[] paramTypesArray = paramTypes.split(",");
-        Class<?>[] paramTypeClasses = new Class<?>[paramTypesArray.length];
-        for (int i = 0; i < paramTypesArray.length; i++) {
-            paramTypeClasses[i] = Class.forName(paramTypesArray[i]);
+        Runnable task;
+        if (paramTypes.isEmpty()) {
+            Constructor<?> taskConstructor = taskClass.getConstructor();
+
+            task = (Runnable) taskConstructor.newInstance();
+        } else {
+            String[] paramTypesArray = paramTypes.split(",");
+            Class<?>[] paramTypeClasses = new Class<?>[paramTypesArray.length];
+            for (int i = 0; i < paramTypesArray.length; i++) {
+                paramTypeClasses[i] = Class.forName(paramTypesArray[i]);
+            }
+            Constructor<?> taskConstructor = taskClass.getConstructor(paramTypeClasses);
+
+            String[] paramsArray = params.split(",");
+            Object[] paramsObjectArray = new Object[paramsArray.length];
+            for (int i = 0; i < paramsObjectArray.length; i++) {
+                Method method = paramTypeClasses[i].getMethod("valueOf", String.class);
+                paramsObjectArray[i] = method.invoke(null, paramsArray[i]);
+            }
+
+            task = (Runnable) taskConstructor.newInstance(paramsObjectArray);
+
         }
 
-        Constructor<?> taskConstructor = taskClass.getConstructor(paramTypeClasses);
-
-        String[] paramsArray = params.split(",");
-        Object[] paramsObjectArray = new Object[paramsArray.length];
-        for (int i = 0; i < paramsObjectArray.length; i++) {
-            Method method = paramTypeClasses[i].getMethod("valueOf", String.class);
-            paramsObjectArray[i] = method.invoke(null, paramsArray[i]);
-        }
-
-        Runnable task = (Runnable) taskConstructor.newInstance(paramsObjectArray);
-
-        if (requireServiceTypes != null) {
+        if (!requireServiceTypes.isEmpty()) {
             String[] requireServicesArray = requireServiceTypes.split(",");
             for (String requireService : requireServicesArray) {
                 Class<?> requireServiceType = Class.forName(requireService);
