@@ -10,7 +10,7 @@ import net.mikoto.aozora.model.Artwork;
  * Create for aozora
  */
 public interface ArtworkService extends IService<Artwork> {
-    Artwork getRemoteArtwork(int artworkId, String sessionId, boolean isLog);
+    Artwork getRemoteArtwork(int artworkId, String sessionId);
     Artwork getRemoteArtwork(int artworkId);
     byte[] getImage(String url);
     int getCachedArtworksCount();

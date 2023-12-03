@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.AozoraApplicationContextGetter;
 import net.mikoto.aozora.service.TaskService;
+import net.mikoto.aozora.service.impl.TaskServiceImpl;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,7 +79,7 @@ public class TaskRestController {
             }
         }
 
-        taskService.runTask(task);
+        taskService.runTask(task, TaskServiceImpl.Tag.A);
 
         return new JSONObject();
     }

@@ -3,6 +3,7 @@ package net.mikoto.aozora.model.tasks;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
+import net.mikoto.aozora.client.PixivClient;
 import net.mikoto.aozora.service.ArtworkService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ public class ArtworksCountUpdateTask implements Runnable {
     public void run() {
         cache = (int) artworkService.count();
         artworkService.setCachedArtworksCount(cache);
+        log.info("Do Update: ArtworksCountCache");
         try {
             Thread.sleep(20000);
         } catch (InterruptedException e) {

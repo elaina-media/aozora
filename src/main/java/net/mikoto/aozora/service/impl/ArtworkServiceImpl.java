@@ -67,7 +67,7 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
 
         Artwork artwork;
         try {
-            artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount], defaultConfig.isLog());
+            artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount]);
         } catch (ForestNetworkException e) {
             if (e.getStatusCode() == 404) {
                 return null;
@@ -84,7 +84,7 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
                 }
                 Thread.sleep(60000);
                 log.info("Restart patch with: " + defaultConfig.getPhpSessionId()[sessionIdCount]);
-                artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount], defaultConfig.isLog());
+                artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount]);
             } else {
                 throw e;
             }
@@ -100,99 +100,12 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
 
     @SneakyThrows
     @Override
-    public Artwork getRemoteArtwork(int artworkId, String sessionId, boolean isLog) {
+    public Artwork getRemoteArtwork(int artworkId, String sessionId) {
         String rawData = pixivClient.getArtwork(artworkId, "PHPSESSID=" + sessionId);
         JSONObject artworkRawData = JSON.parseObject(rawData);
 
-        if (artworkRawData.getBooleanValue("error")) {
-            return null;
-        }
 
-        Artwork artwork = new Artwork();
-        JSONObject artworkBodyRawData = artworkRawData.getJSONObject("body");
-
-        // 基础数据
-        artwork.setArtworkId(Integer.parseInt(artworkBodyRawData.getString("illustId")));
-        artwork.setArtworkTitle(artworkBodyRawData.getString("illustTitle"));
-        artwork.setAuthorId(Integer.parseInt(artworkBodyRawData.getString("userId")));
-        artwork.setAuthorName(artworkBodyRawData.getString("userName"));
-        artwork.setDescription(artworkBodyRawData.getString("description"));
-        artwork.setPageCount(artworkBodyRawData.getIntValue("pageCount"));
-        artwork.setBookmarkCount(artworkBodyRawData.getIntValue("bookmarkCount"));
-        artwork.setLikeCount(artworkBodyRawData.getIntValue("likeCount"));
-        artwork.setViewCount(artworkBodyRawData.getIntValue("viewCount"));
-        // 时间
-        Date createTime = DATE_FORMAT.parse(artworkBodyRawData.getString("createDate"));
-        Date updateTime = DATE_FORMAT.parse(artworkBodyRawData.getString("uploadDate"));
-        artwork.setCreateTime(createTime);
-        artwork.setUpdateTime(updateTime);
-        artwork.setPatchTime(new Date());
-        // 链接
-        JSONObject urls = artworkBodyRawData.getJSONObject("urls");
-        artwork.setIllustUrlMini(urls.getString("mini").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlOriginal(urls.getString("original").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlRegular(urls.getString("regular").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlThumb(urls.getString("thumb").replace(PIXIV_IMAGE_URL, ""));
-        artwork.setIllustUrlSmall(urls.getString("small").replace(PIXIV_IMAGE_URL, ""));
-        // 年龄分级
-        Artwork.Grading grading = Artwork.Grading.General;
-        // 标签
-        StringJoiner tags = new StringJoiner(";");
-        JSONArray tagsArray = artworkBodyRawData
-                .getJSONObject("tags")
-                .getJSONArray("tags");
-        for (int i = 0; i < tagsArray.size(); i++) {
-            String tag = tagsArray.getJSONObject(i).getString("tag");
-            // 年龄分级判断
-            if ("R-18".equals(tag)) {
-                grading = Artwork.Grading.R18;
-            } else if ("R-18G".equals(tag)) {
-                grading = Artwork.Grading.R18G;
-            }
-
-            // 标签收集
-            tags.add(tag);
-        }
-        artwork.setGrading(grading);
-        artwork.setTags(tags.toString());
-
-        // 系列作品数据
-        JSONObject seriesJson = artworkRawData.getJSONObject("seriesNavData");
-
-        artwork.setHasSeries(seriesJson != null);
-        if (!artwork.isHasSeries()) {
-            if (isLog) {
-                doLogArtwork(artwork);
-            }
-            return artwork;
-        }
-
-        assert seriesJson != null;
-        artwork.setSeriesId(Integer.parseInt(seriesJson.getString("seriesId")));
-        artwork.setSeriesOrder(seriesJson.getIntValue("order"));
-
-        JSONObject previousJson = seriesJson.getJSONObject("prev");
-        if (previousJson != null) {
-            artwork.setPreviousArtworkId(Integer.parseInt(previousJson.getString("id")));
-            artwork.setPreviousArtworkTitle(previousJson.getString("title"));
-        }
-
-        JSONObject nextJson = seriesJson.getJSONObject("next");
-        if (nextJson != null) {
-            artwork.setNextArtworkId(Integer.parseInt(nextJson.getString("id")));
-            artwork.setNextArtworkTitle(nextJson.getString("title"));
-        }
-
-        if (isLog) {
-            doLogArtwork(artwork);
-        }
-        return artwork;
-    }
-
-    private void doLogArtwork(@NotNull Artwork artwork) {
-        log.info("[Aozora] Get Artwork: " + artwork.getArtworkId());
-        log.info("[Aozora] ArtworkJson: " + JSONObject.toJSONString(artwork));
-        log.info("[Aozora] ArtworkTableId: " + (artwork.getArtworkId() % 100));
+        return Artwork.parseFromRawJson(artworkRawData);
     }
 
     private void nextSessionId(@NotNull AozoraConfig config) {
