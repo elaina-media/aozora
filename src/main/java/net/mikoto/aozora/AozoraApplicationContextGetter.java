@@ -32,6 +32,6 @@ public class AozoraApplicationContextGetter implements ApplicationContextAware {
      * @return Object bean的实例对象
      */
     public <T> @NotNull T getBean(Class<T> clz) throws BeansException {
-        return (T) applicationContext.getBean(clz);
+        return applicationContext.getBean(clz);
     }
 }
