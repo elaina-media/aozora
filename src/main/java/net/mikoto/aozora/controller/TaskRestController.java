@@ -39,7 +39,8 @@ public class TaskRestController {
             @RequestParam String taskClassName,
             @RequestParam String paramTypes,
             @RequestParam String params,
-            @RequestParam String requireServiceTypes) {
+            @RequestParam String requireServiceTypes,
+            @RequestParam String poolId) {
         Class<? extends Runnable> taskClass = Class.forName(taskClassName).asSubclass(Runnable.class);
 
         Runnable task;
@@ -79,7 +80,7 @@ public class TaskRestController {
             }
         }
 
-        taskService.runTask(task, TaskServiceImpl.Tag.A);
+        taskService.runTask(task, TaskServiceImpl.Tag.valueOf(poolId));
 
         return new JSONObject();
     }

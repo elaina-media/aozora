@@ -9,7 +9,6 @@ import com.dtflys.forest.annotation.Var;
  * &#064;date 2023/11/16
  * Create for aozora
  */
-@HTTPProxy(host = "127.0.0.1", port = "7891")
 public interface PixivClient {
     @Get(
             url = "https://www.pixiv.net/ajax/illust/{artworkId}",

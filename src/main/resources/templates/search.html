@@ -59,7 +59,7 @@
 <div class="row" style="width: 85%;margin: 50px auto">
     <mdui-card clickable style="text-align: center;width: fit-content;height: fit-content;max-width: 22%;margin: 5px" th:each="artwork:${artworks}" th:href="'/artwork/' + ${artwork.getArtworkId()}">
         <mdui-badge style="position: absolute; right: 5%; top: 10px;padding: 10px" th:text="${artwork.getGrading().name().replace('General', '全年龄')}">General</mdui-badge>
-        <img th:src="'http://forward-1.aozora.elaina-media.cc/artwork/getImage?url=' + ${artwork.getIllustUrlSmall()}"/>
+        <img th:src="'/api/artwork/getImage?url=' + ${artwork.getIllustUrlSmall()}"/>
         <h2 th:text="${artwork.getArtworkTitle()}">
             Artwork_Title
         </h2>

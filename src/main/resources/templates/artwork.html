@@ -45,7 +45,7 @@
         </p>
     </div>
     <div class="col-sm-8" style="margin-top: 75px;text-align: center;margin-bottom: 50px" id="img-space">
-        <img th:src="'http://forward-1.aozora.elaina-media.cc/artwork/getImage?url=' + ${artwork.getIllustUrlRegular()}" style="margin-left: 0;width: fit-content"/>
+        <img th:src="'/api/artwork/getImage?url=' + ${artwork.getIllustUrlRegular()}" style="margin-left: 0;width: fit-content"/>
         <br><br>
         <mdui-button th:if="${artwork.getPageCount() > 1}" id="load-all-button" onclick="loadAllImage()">加载全部</mdui-button>
     </div>
@@ -53,7 +53,7 @@
 
 <script>
 
-    const imageAddress = "http://forward-1.aozora.elaina-media.cc/artwork/getImage?url=" + "[[${artwork.getIllustUrlRegular()}]]";
+    const imageAddress = "/api/artwork/getImage?url=" + "[[${artwork.getIllustUrlRegular()}]]";
     const imageCount = [[${artwork.getPageCount()}]]
 
     function loadAllImage() {

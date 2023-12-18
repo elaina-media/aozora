@@ -32,15 +32,6 @@ import java.util.StringJoiner;
 public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> implements ArtworkService {
     private final PixivClient pixivClient;
     private final AozoraConfig defaultConfig;
-    /**
-     * Pixiv usual date format.
-     * <p>
-     * e.g.
-     * 2020-03-05T01:23:36+00:00
-     * 2021-07-15T15:48:17+00:00
-     */
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-    private static final String PIXIV_IMAGE_URL = "https://i.pximg.net";
     private static int sessionIdCount = 0;
     private static int getCount = 0;
     @Setter

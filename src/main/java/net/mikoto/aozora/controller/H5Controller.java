@@ -2,7 +2,6 @@ package net.mikoto.aozora.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import net.mikoto.aozora.model.Artwork;
-import net.mikoto.aozora.model.tasks.ArtworksCountUpdateTask;
 import net.mikoto.aozora.service.ArtworkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -49,7 +48,6 @@ public class H5Controller {
                                @RequestParam(value = "type", defaultValue = "desc") String type,
                                @RequestParam(value = "grading", defaultValue = "0") int grading) {
         JSONObject result = artworkRestController.getArtworksByKeys(page, keys, column, type, grading);
-//        JSONObject result2 = artworkRestController.getArtworksCount();
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("search");

@@ -3,12 +3,10 @@ package net.mikoto.aozora.service.impl;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.model.multipleTask.MultipleTask;
 import net.mikoto.aozora.service.TaskService;
-import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -21,51 +19,32 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Log
 public class TaskServiceImpl implements TaskService, AutoCloseable {
-    private static final ThreadPoolExecutor[] THREAD_POOL_EXECUTORS;
-
-    static {
-        ThreadPoolExecutor aPool = null;
-        ThreadPoolExecutor bPool = null;
-        ThreadPoolExecutor cPool = null;
-        try {
-            aPool = new ThreadPoolExecutor(
+    private static final ThreadPoolExecutor[] THREAD_POOL_EXECUTORS = new ThreadPoolExecutor[] {
+            new ThreadPoolExecutor(
                     6,
                     6,
                     1,
                     TimeUnit.HOURS,
                     new LinkedBlockingDeque<>(),
                     new CustomizableThreadFactory("Aozora-A-Task-%d")
-            );
-            bPool = new ThreadPoolExecutor(
+            ),
+            new ThreadPoolExecutor(
                     6,
                     6,
                     1,
                     TimeUnit.HOURS,
                     new LinkedBlockingDeque<>(),
                     new CustomizableThreadFactory("Aozora-B-Task-%d")
-            );
-            cPool = new ThreadPoolExecutor(
-                    6,
-                    6,
-                    1,
-                    TimeUnit.HOURS,
-                    new LinkedBlockingDeque<>(),
-                    new CustomizableThreadFactory("Aozora-C-Task-%d")
-            );
-
-            THREAD_POOL_EXECUTORS = new ThreadPoolExecutor[] {aPool, bPool, cPool};
-        } finally {
-            if (aPool != null) {
-                aPool.close();
-            }
-            if (aPool != null) {
-                aPool.close();
-            }
-            if (aPool != null) {
-                aPool.close();
-            }
-        }
-    }
+            ),
+            new ThreadPoolExecutor(
+            6,
+            6,
+            1,
+            TimeUnit.HOURS,
+            new LinkedBlockingDeque<>(),
+            new CustomizableThreadFactory("Aozora-C-Task-%d")
+            )
+    };
 
     @Override
     public void runTask(Runnable task, @NotNull Tag tag) {
@@ -73,11 +52,17 @@ public class TaskServiceImpl implements TaskService, AutoCloseable {
     }
 
     public void runTask(@NotNull MultipleTask multipleTask, Tag tag) {
-        Runnable task = multipleTask.popTask();
-        while (task != null) {
+        for (int i = 0; i < multipleTask.getCacheMaxSize(); i++) {
+            Runnable task = multipleTask.popTask();
+
+            if (task == null) {
+                break;
+            }
+
             runTask(task, tag);
-            task = multipleTask.popTask();
         }
+
+
     }
 
     @Override
@@ -88,6 +73,6 @@ public class TaskServiceImpl implements TaskService, AutoCloseable {
     }
 
     public enum Tag {
-        A,B,C
+        A, B, C
     }
 }

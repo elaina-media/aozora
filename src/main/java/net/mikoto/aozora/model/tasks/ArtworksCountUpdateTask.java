@@ -22,13 +22,15 @@ public class ArtworksCountUpdateTask implements Runnable {
 
     @Override
     public void run() {
-        cache = (int) artworkService.count();
-        artworkService.setCachedArtworksCount(cache);
-        log.info("Do Update: ArtworksCountCache");
-        try {
-            Thread.sleep(20000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        for (;;) {
+            cache = (int) artworkService.count();
+            artworkService.setCachedArtworksCount(cache);
+            log.info("更新Artwork计数器缓存");
+            try {
+                Thread.sleep(20000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

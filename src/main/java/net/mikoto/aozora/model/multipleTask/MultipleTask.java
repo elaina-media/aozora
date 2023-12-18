@@ -7,4 +7,5 @@ package net.mikoto.aozora.model.multipleTask;
  */
 public interface MultipleTask {
     Runnable popTask();
+    int getCacheMaxSize();
 }
