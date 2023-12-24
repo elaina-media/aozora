@@ -8,4 +8,5 @@ package net.mikoto.aozora.model.multipleTask;
 public interface MultipleTask {
     SingleTask popTask();
     int getLoopCount();
+    long getTaskId();
 }

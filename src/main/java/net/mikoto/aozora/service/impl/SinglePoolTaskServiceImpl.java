@@ -1,5 +1,6 @@
 package net.mikoto.aozora.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.model.AozoraConfig;
 import net.mikoto.aozora.model.multipleTask.MultipleTask;
@@ -8,8 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,9 +25,9 @@ public class SinglePoolTaskServiceImpl implements TaskService {
     private final ThreadPoolExecutor THREAD_POOL;
     private final Set<Class<?>> classSet = new HashSet<>();
     private final Set<Class<? extends MultipleTask>> multipleTaskClassSet = new HashSet<>();
-    private final Set<RunningTask> runningTaskSet = new HashSet<>();
+    private final Map<Long, RunningTask> runningTasksMap = new HashMap<>();
 
-    public SinglePoolTaskServiceImpl(AozoraConfig aozoraConfig) {
+    public SinglePoolTaskServiceImpl(@NotNull AozoraConfig aozoraConfig) {
         THREAD_POOL = new ThreadPoolExecutor(
                 aozoraConfig.getThreadPoolCorePoolSize()[0],
                 aozoraConfig.getThreadPoolMaxCorePoolSize()[0],
@@ -39,26 +39,40 @@ public class SinglePoolTaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void runTask(MultipleTask task, MultiPoolTaskServiceImpl.PoolTag poolTag) {
+    public long runTask(@NotNull MultipleTask multipleTask, MultiPoolTaskServiceImpl.PoolTag poolTag) {
+        RunningTask runningTask = getDefaultTask(TaskType.MultipleTask);
+        runningTasksMap.put(multipleTask.getTaskId(), runningTask);
+
         THREAD_POOL.execute(
                 () -> {
-                    Runnable singleTask = task.popTask();
+                    Runnable singleTask = multipleTask.popTask();
                     while (singleTask != null) {
                         singleTask.run();
-                        singleTask = task.popTask();
+                        singleTask = multipleTask.popTask();
                     }
                 }
         );
+
+        return multipleTask.getTaskId();
     }
 
     @Override
-    public void runTask(Runnable task, MultiPoolTaskServiceImpl.PoolTag poolTag) {
+    public long runTask(Runnable task, MultiPoolTaskServiceImpl.PoolTag poolTag) {
+        long taskId = IdUtil.getSnowflakeNextId();
+        RunningTask runningTask = getDefaultTask(TaskType.SingleTask);
+        runningTasksMap.put(taskId, runningTask);
         THREAD_POOL.execute(task);
+        return taskId;
     }
 
     @Override
     public RunningTask[] getRunningTasks() {
-        return runningTaskSet.toArray(new RunningTask[0]);
+        return runningTasksMap.values().toArray(new RunningTask[0]);
+    }
+
+    @Override
+    public RunningTask getRunningTask(long taskId) {
+        return runningTasksMap.get(taskId);
     }
 
     @Override

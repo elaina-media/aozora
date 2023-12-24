@@ -41,7 +41,6 @@ public class ArtworkMultipleTask implements MultipleTask {
     private int totalNotNullWorkCount;
     private int totalNullWorkCount;
 
-    private Date cacheStartDate;
     private int cachedWorkCount;
     private int notNullWorkCount;
     private int nullWorkCount;

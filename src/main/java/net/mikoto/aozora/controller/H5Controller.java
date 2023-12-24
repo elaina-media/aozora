@@ -41,6 +41,16 @@ public class H5Controller {
         return modelAndView;
     }
 
+    @RequestMapping("/taskManager")
+    public ModelAndView taskManager() {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("taskManager");
+//        modelAndView.addObject("artwork", artwork);
+//        modelAndView.addObject("formattedCreateTime", DATE_FORMAT.format(artwork.getCreateTime()));
+
+        return modelAndView;
+    }
+
     @RequestMapping("/search")
     public ModelAndView search(@RequestParam(value = "page", defaultValue = "1") int page,
                                @RequestParam(value = "keys", defaultValue = "") String keys,

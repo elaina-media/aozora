@@ -1,7 +1,6 @@
 package net.mikoto.aozora.service.impl;
 
-import io.vertx.sqlclient.Pool;
-import lombok.SneakyThrows;
+import cn.hutool.core.util.IdUtil;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.model.AozoraConfig;
 import net.mikoto.aozora.model.multipleTask.MultipleTask;
@@ -11,9 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +26,7 @@ public class MultiPoolTaskServiceImpl implements TaskService, AutoCloseable {
     private final ThreadPoolExecutor[] THREAD_POOLS;
     private final Set<Class<?>> classSet = new HashSet<>();
     private final Set<Class<? extends MultipleTask>> multipleTaskClassSet = new HashSet<>();
-    private final Set<RunningTask> runningTaskSet = new HashSet<>();
+    private final Map<Long, RunningTask> runningTasksMap = new HashMap<>();
 
     @SuppressWarnings("resource")
     public MultiPoolTaskServiceImpl(AozoraConfig aozoraConfig) {
@@ -47,7 +44,9 @@ public class MultiPoolTaskServiceImpl implements TaskService, AutoCloseable {
         }
     }
 
-    public void runTask(@NotNull MultipleTask multipleTask, @NotNull PoolTag poolTag) {
+    @SuppressWarnings("BusyWait")
+    @Override
+    public long runTask(@NotNull MultipleTask multipleTask, @NotNull PoolTag poolTag) {
         // 计算下一线程池
         PoolTag nextPoolTag;
         if (poolTag.ordinal() + 1 != PoolTag.values().length) {
@@ -56,36 +55,9 @@ public class MultiPoolTaskServiceImpl implements TaskService, AutoCloseable {
             nextPoolTag = PoolTag.values()[0];
         }
 
-        RunningTask runningTask = new RunningTask() {
-            private final long startTime = new Date().getTime();
-            private boolean flag = false;
-            private long continuedTime;
+        RunningTask runningTask = getDefaultTask(TaskType.MultipleTask);
+        runningTasksMap.put(multipleTask.getTaskId(), runningTask);
 
-            @Override
-            public TaskType taskType() {
-                return TaskType.MultipleTask;
-            }
-
-            @Override
-            public long taskContinuedTime() {
-                if (flag) {
-                    return continuedTime;
-                }
-                return new Date().getTime() - startTime;
-            }
-
-            @Override
-            public void endTask() {
-                flag = true;
-                continuedTime = new Date().getTime() - startTime;
-            }
-
-            @Override
-            public boolean isEnd() {
-                return flag;
-            }
-        };
-        runningTaskSet.add(runningTask);
 
         // 推送任务布置线程
         THREAD_POOLS[poolTag.ordinal()].execute(
@@ -146,11 +118,13 @@ public class MultiPoolTaskServiceImpl implements TaskService, AutoCloseable {
                     }
                 }
         );
+
+        return multipleTask.getTaskId();
     }
 
     @Override
     public RunningTask[] getRunningTasks() {
-        return runningTaskSet.toArray(new RunningTask[0]);
+        return runningTasksMap.values().toArray(new RunningTask[0]);
     }
 
     @Override
@@ -161,8 +135,12 @@ public class MultiPoolTaskServiceImpl implements TaskService, AutoCloseable {
     }
 
     @Override
-    public void runTask(Runnable task, @NotNull MultiPoolTaskServiceImpl.PoolTag poolTag) {
+    public long runTask(Runnable task, @NotNull MultiPoolTaskServiceImpl.PoolTag poolTag) {
+        long taskId = IdUtil.getSnowflakeNextId();
+        RunningTask runningTask = getDefaultTask(TaskType.SingleTask);
+        runningTasksMap.put(taskId, runningTask);
         THREAD_POOLS[poolTag.ordinal()].execute(task);
+        return taskId;
     }
 
     @Override
@@ -178,6 +156,11 @@ public class MultiPoolTaskServiceImpl implements TaskService, AutoCloseable {
     @Override
     public Class<?>[] getRegisteredClasses() {
         return classSet.toArray(new Class[0]);
+    }
+
+    @Override
+    public RunningTask getRunningTask(long taskId) {
+        return runningTasksMap.get(taskId);
     }
 
     @SuppressWarnings("unchecked")
