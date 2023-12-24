@@ -7,6 +7,7 @@ import lombok.extern.java.Log;
 import net.mikoto.aozora.model.Artwork;
 import net.mikoto.aozora.service.ArtworkService;
 
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -86,8 +87,8 @@ public class PatchBatchArtworksTask implements Runnable {
         try {
             artwork = artworkService.getRemoteArtwork(artworkId);
         } catch (ForestRuntimeException e) {
-            if (e.getCause() instanceof SocketTimeoutException) {
-                log.info("Time out at task: " + startId + " -> " + endId);
+            if (e.getCause() instanceof IOException) {
+                log.info("任务中断于：" + artworkId);
                 Thread.sleep(10000);
                 log.info("Restart patch at: " + artworkId);
                 doGet(artworkId);

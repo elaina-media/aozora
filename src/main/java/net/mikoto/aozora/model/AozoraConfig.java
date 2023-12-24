@@ -30,4 +30,16 @@ public class AozoraConfig {
             "100916501_z7xLABvGX2LBGUA2gaOFsKCd2KYwXill",
             "100916521_669daslJ21TVM2biH9tCNHqgJw0mxLXk"
     };
+
+    private String[] tasks = new String[]{
+            "net.mikoto.aozora.model.tasks.PatchBatchArtworksTask",
+            "net.mikoto.aozora.model.tasks.ArtworksCountUpdateTask"
+    };
+
+    private String[] multipleTasks = new String[]{
+            "net.mikoto.aozora.model.multipleTask.ArtworkMultipleTask"
+    };
+
+    private int[] threadPoolCorePoolSize = new int[] {4,4,4};
+    private int[] threadPoolMaxCorePoolSize = new int[] {4,4,4};
 }

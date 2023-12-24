@@ -29,9 +29,9 @@
             Unknown-Description
         </p>
         <p>
-            <span th:each="tag:${artwork.getTags().split(';')}">
-                <a th:text="'#' + ${tag}" th:href="'/search?keys=' + ${tag}"></a>
-                <span th:text="${tag}" style="color: dimgray"></span>
+            <span th:each="poolTag:${artwork.getTags().split(';')}">
+                <a th:text="'#' + ${poolTag}" th:href="'/search?keys=' + ${poolTag}"></a>
+                <span th:text="${poolTag}" style="color: dimgray"></span>
             </span>
         </p>
         <p style="color: dimgray">

@@ -36,6 +36,7 @@ public class ArtworkMultipleTask implements MultipleTask {
     // Artwork prop
     private final Integer startId;
     private final Integer endId;
+    private final Integer lookCount;
     private int doneWorkCount;
     private int totalNotNullWorkCount;
     private int totalNullWorkCount;
@@ -49,16 +50,17 @@ public class ArtworkMultipleTask implements MultipleTask {
 
     private final Set<Artwork> cache = new HashSet<>();
 
-    public ArtworkMultipleTask(Integer startId, Integer endId) {
+    public ArtworkMultipleTask(Integer startId, Integer endId, Integer lookCount) {
         this.startId = startId;
         this.endId = endId;
+        this.lookCount = lookCount;
         this.taskId = IdUtil.getSnowflakeNextId();
         this.startDate = new Date();
         log.info("ArtworkMultipleTask成功装载于: " + taskId);
     }
 
     @Override
-    public Runnable popTask() {
+    public SingleTask popTask() {
         int artworkId = startId + doneWorkCount;
         String sessionId = aozoraConfig.getPhpSessionId()[sessionIdCount];
 
@@ -76,36 +78,47 @@ public class ArtworkMultipleTask implements MultipleTask {
         doneWorkCount++;
         sessionIdCount++;
 
-        return () -> {
-            cachedWorkCount++;
+        return new SingleTask() {
+            boolean flag = false;
 
-            // SessionId计数器清零
-            if (sessionIdCount > aozoraConfig.getPhpSessionId().length) {
-                sessionIdCount = 0;
+            @Override
+            public boolean isFinished() {
+                return flag;
             }
 
-            // 缓存更新
-            if (cachedWorkCount > 100) {
-                artworkService.saveOrUpdateBatch(cache);
-                cache.clear();
-                Date cacheEndDate = new Date();
+            @Override
+            public void run() {
+                cachedWorkCount++;
 
-                // 日志
-                log.info("百步缓存更新于: " + (artworkId - 100) + " -> " + (artworkId - 1));
-                printBaseTaskInfo();
-                System.out.println("    缓内任务用时：" + ((double) (cacheEndDate.getTime() - startDate.getTime()) / 1000.00) + "s" + "s");
-                System.out.println("    缓内作业数：" + cachedWorkCount);
-                System.out.println("        缓内有效作业数：" + notNullWorkCount);
-                System.out.println("        缓内无效作业数：" + nullWorkCount);
-                System.out.println();
+                // SessionId计数器清零
+                if (sessionIdCount > aozoraConfig.getPhpSessionId().length) {
+                    sessionIdCount = 0;
+                }
 
-                // 计数器刷新：有效/无效作业
-                notNullWorkCount = 0;
-                nullWorkCount = 0;
-                cachedWorkCount = 0;
+                // 缓存更新
+                if (cachedWorkCount > 100) {
+                    artworkService.saveOrUpdateBatch(cache);
+                    cache.clear();
+                    Date cacheEndDate = new Date();
+
+                    // 日志
+                    log.info("百步缓存更新于: " + (artworkId - 100) + " -> " + (artworkId - 1));
+                    printBaseTaskInfo();
+                    System.out.println("    缓内任务用时：" + ((double) (cacheEndDate.getTime() - startDate.getTime()) / 1000.00) + "s" + "s");
+                    System.out.println("    缓内作业数：" + cachedWorkCount);
+                    System.out.println("        缓内有效作业数：" + notNullWorkCount);
+                    System.out.println("        缓内无效作业数：" + nullWorkCount);
+                    System.out.println();
+
+                    // 计数器刷新：有效/无效作业
+                    notNullWorkCount = 0;
+                    nullWorkCount = 0;
+                    cachedWorkCount = 0;
+                }
+
+                cache.add(doPatchArtwork(artworkId, sessionId, 0));
+                flag = true;
             }
-
-            cache.add(doPatchArtwork(artworkId, sessionId, 0));
         };
     }
 
@@ -158,7 +171,7 @@ public class ArtworkMultipleTask implements MultipleTask {
     }
 
     @Override
-    public int getCacheMaxSize() {
-        return 100;
+    public int getLoopCount() {
+        return lookCount;
     }
 }

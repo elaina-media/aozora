@@ -32,7 +32,6 @@ dependencies {
 	implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.3.1'
 	implementation 'mysql:mysql-connector-java:8.0.32'
 	implementation 'org.apache.shardingsphere:shardingsphere-jdbc-core-spring-boot-starter:5.2.1'
-	implementation 'ru.yandex.clickhouse:clickhouse-jdbc:0.2.4'
 
 	// Utils
 	implementation 'com.dtflys.forest:forest-spring-boot-starter:1.5.33'

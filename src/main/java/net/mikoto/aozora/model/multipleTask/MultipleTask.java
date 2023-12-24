@@ -6,6 +6,6 @@ package net.mikoto.aozora.model.multipleTask;
  * Create for aozora
  */
 public interface MultipleTask {
-    Runnable popTask();
-    int getCacheMaxSize();
+    SingleTask popTask();
+    int getLoopCount();
 }

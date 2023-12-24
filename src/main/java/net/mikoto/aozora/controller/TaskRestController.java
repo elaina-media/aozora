@@ -5,8 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.AozoraApplicationContextGetter;
 import net.mikoto.aozora.service.TaskService;
-import net.mikoto.aozora.service.impl.TaskServiceImpl;
-import org.jetbrains.annotations.NotNull;
+import net.mikoto.aozora.service.impl.MultiPoolTaskServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -80,8 +79,23 @@ public class TaskRestController {
             }
         }
 
-        taskService.runTask(task, TaskServiceImpl.Tag.valueOf(poolId));
+        taskService.runTask(task, MultiPoolTaskServiceImpl.PoolTag.valueOf(poolId));
 
         return new JSONObject();
+    }
+
+    @RequestMapping(
+            "/getCurrentTasks"
+    )
+    public JSONObject getTasks() {
+        JSONObject result = new JSONObject();
+
+    }
+
+    @RequestMapping(
+            "/getRegisteredTasks"
+    )
+    public JSONObject getRegisteredTasksList() {
+
     }
 }
