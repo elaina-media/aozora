@@ -2,9 +2,10 @@
 
 集成`SpringBoot` `MyBatis-Plus` `ShardingSphere`的现代化Pixiv集成项目
 
-## 以实现的功能
+## 已实现的功能
 
  - Pixiv插画主站插画数据Api
+ - Pixiv主站爬虫
  - Pixiv相关数据库CRUD
 
 ## 声明
