@@ -19,7 +19,13 @@ public class ArtworksCountUpdateTask implements Runnable {
     @Setter
     private ArtworkService artworkService;
     private int cache;
+    private final Long period;
 
+    public ArtworksCountUpdateTask(Long period) {
+        this.period = period;
+    }
+
+    @SuppressWarnings({"BusyWait", "InfiniteLoopStatement"})
     @Override
     public void run() {
         for (;;) {
@@ -27,7 +33,7 @@ public class ArtworksCountUpdateTask implements Runnable {
             artworkService.setCachedArtworksCount(cache);
             log.info("更新Artwork计数器缓存");
             try {
-                Thread.sleep(20000);
+                Thread.sleep(period);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

@@ -115,17 +115,17 @@ public class ArtworkMultipleTask implements MultipleTask {
                     cachedWorkCount = 0;
                 }
 
-                cache.add(doPatchArtwork(artworkId, sessionId, 0));
+                cache.add(doPatchArtwork(artworkId, 0));
                 flag = true;
             }
         };
     }
 
     @SneakyThrows
-    private @Nullable Artwork doPatchArtwork(int artworkId, String sessionId, int loopCount) {
+    private @Nullable Artwork doPatchArtwork(int artworkId, int loopCount) {
         Artwork artwork = null;
         try {
-            String rawData = pixivClient.getArtwork(artworkId, "PHPSESSID=" + sessionId);
+            String rawData = pixivClient.getArtwork(artworkId);
             artwork = Artwork.parseFromRawJson(JSON.parseObject(rawData));
         } catch (ForestRuntimeException e) {
             if (e.getCause() instanceof SocketTimeoutException) {
@@ -143,7 +143,7 @@ public class ArtworkMultipleTask implements MultipleTask {
                 System.out.println("    任务起始作业：" + startId);
                 System.out.println("    任务起始作业：" + endId);
                 loopCount++;
-                artwork = doPatchArtwork(artworkId, sessionId, loopCount);
+                artwork = doPatchArtwork(artworkId, loopCount);
             }
         }
         return artwork;

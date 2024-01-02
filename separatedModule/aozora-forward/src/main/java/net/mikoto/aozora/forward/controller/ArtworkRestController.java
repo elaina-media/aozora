@@ -1,10 +1,12 @@
 package net.mikoto.aozora.forward.controller;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
 import net.mikoto.aozora.client.PixivClient;
 import net.mikoto.aozora.forward.service.ArtworkService;
 import net.mikoto.aozora.forward.service.AvailableRoute;
 import net.mikoto.aozora.model.Artwork;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +31,6 @@ public class ArtworkRestController {
             "100916473_lmyfaP73DQtY4cWG0K91601xI2i13BGo",
             "100916501_z7xLABvGX2LBGUA2gaOFsKCd2KYwXill",
             "100916521_669daslJ21TVM2biH9tCNHqgJw0mxLXk"
-
     };
     private int cookieCount = 0;
 

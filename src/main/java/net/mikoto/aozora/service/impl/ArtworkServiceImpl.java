@@ -13,30 +13,33 @@ import net.mikoto.aozora.client.PixivClient;
 import net.mikoto.aozora.mapper.ArtworkMapper;
 import net.mikoto.aozora.model.AozoraConfig;
 import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.model.ExtensionTag;
 import net.mikoto.aozora.service.ArtworkService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.StringJoiner;
 
 /**
  * @author mikoto
  * &#064;date 2023/11/16
  * Create for aozora
  */
-@Component
 @Log
+@Component
 public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> implements ArtworkService {
+    // Beans
     private final PixivClient pixivClient;
     private final AozoraConfig defaultConfig;
     private static int sessionIdCount = 0;
     private static int getCount = 0;
-    @Setter
-    @Getter
+    @Getter @Setter
     private int cachedArtworksCount;
+
+
+    // Dynamic configs
+    private String[] cookies;
+    private String cpsVersion;
     @Autowired
     public ArtworkServiceImpl(PixivClient pixivClient, AozoraConfig defaultConfig) {
         this.pixivClient = pixivClient;
@@ -89,10 +92,31 @@ public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> impl
         return pixivClient.getImage(url);
     }
 
+    @Override
+    public ExtensionTag[] getExtensionTags(String tag, String lang) {
+        String rawData = pixivClient.getCps(tag, lang, cpsVersion);
+        JSONObject cps = JSON.parseObject(rawData);
+        JSONArray tags = cps.getJSONArray("candidates");
+        ExtensionTag[] extensionTags = new ExtensionTag[tags.size()];
+
+        for (int i = 0; i < tags.size(); i++) {
+            JSONObject tagJson = tags.getJSONObject(i);
+            ExtensionTag extensionTag = new ExtensionTag();
+            if (tagJson.getString("type").equals("tag_translation")) {
+                extensionTag.setTagName(tagJson.getString("tag_name"));
+                extensionTag.setTagName(tagJson.getString("tag_translation"));
+            } else if (tagJson.getString("type").equals("prefix")) {
+                extensionTag.setTagName(tagJson.getString("tag_name"));
+            }
+            extensionTags[i] = extensionTag;
+        }
+        return extensionTags;
+    }
+
     @SneakyThrows
     @Override
     public Artwork getRemoteArtwork(int artworkId, String sessionId) {
-        String rawData = pixivClient.getArtwork(artworkId, "PHPSESSID=" + sessionId);
+        String rawData = pixivClient.getArtwork(artworkId);
         JSONObject artworkRawData = JSON.parseObject(rawData);
 
 

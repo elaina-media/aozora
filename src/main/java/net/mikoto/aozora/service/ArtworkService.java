@@ -1,8 +1,8 @@
 package net.mikoto.aozora.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import net.mikoto.aozora.model.AozoraConfig;
 import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.model.ExtensionTag;
 
 /**
  * @author mikoto
@@ -13,6 +13,11 @@ public interface ArtworkService extends IService<Artwork> {
     Artwork getRemoteArtwork(int artworkId, String sessionId);
     Artwork getRemoteArtwork(int artworkId);
     byte[] getImage(String url);
+    ExtensionTag[] getExtensionTags(String tag, String lang);
     int getCachedArtworksCount();
     void setCachedArtworksCount(int artworksCount);
+
+    enum tagLang {
+        zh
+    }
 }

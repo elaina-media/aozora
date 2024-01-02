@@ -7,6 +7,7 @@ import net.mikoto.aozora.forward.service.ArtworkService;
 import net.mikoto.aozora.forward.service.AvailableRoute;
 import net.mikoto.aozora.model.Artwork;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -19,6 +20,7 @@ import java.util.StringJoiner;
  * Create for aozora
  */
 @Service
+@ConfigurationProperties(prefix = "pixiv-client")
 public class ArtworkServiceImpl implements ArtworkService {
 
     /**
@@ -30,6 +32,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      */
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
     private static final String PIXIV_IMAGE_URL = "https://i.pximg.net";
+    private String[] cookies;
 
     @Override
     public Object parseRawData(@NotNull AvailableRoute availableRoute, JSONObject rawData) {
