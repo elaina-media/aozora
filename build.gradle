@@ -38,7 +38,6 @@ dependencies {
 	implementation 'com.alibaba:fastjson:2.0.24'
 	implementation 'org.jetbrains:annotations:23.0.0'
 	implementation 'cn.hutool:hutool-all:5.8.16'
-	implementation 'org.yaml:snakeyaml:2.2'
 
 	// Config
 	implementation 'com.alibaba.boot:nacos-config-spring-boot-starter:0.3.0-RC'

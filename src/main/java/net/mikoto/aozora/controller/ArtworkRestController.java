@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import net.mikoto.aozora.AozoraApplicationProperties;
 import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.model.DynamicConfig;
 import net.mikoto.aozora.service.ArtworkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
@@ -33,6 +36,8 @@ public class ArtworkRestController {
 
     @RequestMapping("/getRemoteArtwork")
     public JSONObject getRemoteArtwork(@RequestParam int artworkId) {
+        System.out.println(AozoraApplicationProperties.dynamicConfig.getCpsVersion());
+        System.out.println(Arrays.toString(AozoraApplicationProperties.dynamicConfig.getCookies()));
         return JSONObject.from(artworkService.getRemoteArtwork(artworkId));
     }
     @RequestMapping("/getRemoteArtworkAndSave")

@@ -88,14 +88,12 @@ public class TaskRestController {
                         "set" + requireServiceType.getSimpleName(),
                         requireServiceType
                 );
-                setServiceMethod.invoke(task, contextGetter.getBean(requireServiceType));
             }
         }
 
         long taskId = taskServiceMap.get(taskServiceType).runTask(task, MultiPoolTaskServiceImpl.PoolTag.valueOf(poolId));
         JSONObject result = new JSONObject();
         result.put("taskId", taskId);
-
         return result;
     }
 

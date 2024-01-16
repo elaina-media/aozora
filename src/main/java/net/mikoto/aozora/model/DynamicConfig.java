@@ -1,8 +1,19 @@
 package net.mikoto.aozora.model;
 
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.config.ConfigService;
+import com.alibaba.nacos.api.config.ConfigType;
+import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
+import com.alibaba.nacos.api.config.annotation.NacosValue;
+import com.alibaba.nacos.api.exception.NacosException;
 import lombok.Data;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.Yaml;
+
+import java.util.Properties;
 
 /**
  * @author mikoto
@@ -11,17 +22,13 @@ import org.springframework.stereotype.Component;
  */
 
 @Data
-@Component
-@ConfigurationProperties(prefix = "pixiv-client")
+@NacosConfigurationProperties(
+        dataId = "forward_client",
+        type = ConfigType.JSON,
+        autoRefreshed = true
+)
 public class DynamicConfig {
-    String[] cookies = new String[] {
-            "100916322_qUikNqRqd3tyQaljYQ0IKK6aVpcIu96w",
-            "100916389_Ou7APQ00NuPiJTgCjCmMHpIHEGhiNVEn",
-            "100916420_Xu2XlbVG7ZwtLIZl7h5hY24wZItIoQw7",
-            "100916458_qIAe5aSLIhztoiwbSFCxHhinsf2Lkz4i",
-            "100916473_lmyfaP73DQtY4cWG0K91601xI2i13BGo",
-            "100916501_z7xLABvGX2LBGUA2gaOFsKCd2KYwXill",
-            "100916521_669daslJ21TVM2biH9tCNHqgJw0mxLXk"
-    };
-    String cpsVersion = "a48f2f681629909b885608393916b81989accf5b";
+    String[] cookies;
+
+    String cpsVersion;
 }

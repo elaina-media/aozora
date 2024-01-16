@@ -9,6 +9,7 @@ import com.dtflys.forest.Forest;
 import com.dtflys.forest.config.ForestConfiguration;
 import net.mikoto.aozora.client.PixivClient;
 import net.mikoto.aozora.mapper.ArtworkMapper;
+import net.mikoto.aozora.model.DynamicConfig;
 import org.apache.ibatis.session.SqlSession;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class AozoraApplicationProperties {
+    public static DynamicConfig dynamicConfig = new DynamicConfig();
     @Bean
     public PixivClient getPixivClient() {
         ForestConfiguration configuration = Forest.config();
@@ -33,5 +35,10 @@ public class AozoraApplicationProperties {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
+    }
+
+    @Bean
+    public DynamicConfig dynamicConfig() {
+        return dynamicConfig;
     }
 }

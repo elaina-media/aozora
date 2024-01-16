@@ -27,7 +27,9 @@ import org.springframework.stereotype.Component;
  */
 @Log
 @Component
-public class ArtworkServiceImpl extends ServiceImpl<ArtworkMapper, Artwork> implements ArtworkService {
+public class ArtworkServiceImpl
+        extends ServiceImpl<ArtworkMapper, Artwork>
+        implements ArtworkService {
     // Beans
     private final PixivClient pixivClient;
     private final AozoraConfig defaultConfig;
