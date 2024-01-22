@@ -1,17 +1,13 @@
 package net.mikoto.aozora.crawler.manager;
 
-import org.springframework.stereotype.Component;
-
-import java.util.Map;
+import cn.hutool.cron.task.Task;
 
 /**
  * @author mikoto
- * &#064;date 2024/1/11
+ * &#064;date 2024/1/21
  * Create for aozora
  */
-@Component
-public class TaskManager {
-    public long create(Runnable task) {
-
-    }
+public interface TaskManager {
+    Class<? extends Task> getTask(String name);
+    void registerTask(String name, Class<? extends Task> clazz);
 }

@@ -4,7 +4,10 @@ import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.mikoto.aozora.model.Artwork;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,10 +19,13 @@ import java.math.BigDecimal;
  * Create for aozora
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("artwork_index")
 public class ArtworkIndex {
     @TableId
-    private Long key;
-    private Integer artworkId;
+    private Long artworkIndexId;
+    private int artworkId;
     private Artwork.Grading grading;
     private int bookmarkCount;
     private int likeCount;
@@ -40,9 +46,29 @@ public class ArtworkIndex {
         if (sbu.length() > 18) {
             String divNum = 1 + "0".repeat(Math.max(0, sbu.length() - 18));
             BigDecimal result = NumberUtil.div(sbu.toString(), divNum);
-            this.key = result.toBigInteger().longValue();
+            this.artworkIndexId = result.toBigInteger().longValue();
             return;
         }
-        this.key = Long.valueOf(sbu.toString());
+        this.artworkIndexId = Long.valueOf(sbu.toString());
+    }
+
+    public static Long getId(@NotNull String key) {
+        StringBuilder sbu = new StringBuilder();
+        char[] chars = SecureUtil.md5(key).toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if(i != chars.length - 1)
+            {
+                sbu.append((int)chars[i]);
+            }
+            else {
+                sbu.append((int)chars[i]);
+            }
+        }
+        if (sbu.length() > 18) {
+            String divNum = 1 + "0".repeat(Math.max(0, sbu.length() - 18));
+            BigDecimal result = NumberUtil.div(sbu.toString(), divNum);
+            return result.toBigInteger().longValue();
+        }
+        return Long.valueOf(sbu.toString());
     }
 }

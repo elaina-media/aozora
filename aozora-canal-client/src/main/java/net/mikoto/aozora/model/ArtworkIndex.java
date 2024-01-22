@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.mikoto.aozora.model.Artwork;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
@@ -23,7 +22,7 @@ import java.math.BigDecimal;
 @TableName("`artwork_index`")
 public class ArtworkIndex {
     @TableId
-    private Long key;
+    private Long artworkIndexId;
     private Integer artworkId;
     private Artwork.Grading grading;
     private int bookmarkCount;
@@ -45,9 +44,9 @@ public class ArtworkIndex {
         if (sbu.length() > 18) {
             String divNum = 1 + "0".repeat(Math.max(0, sbu.length() - 18));
             BigDecimal result = NumberUtil.div(sbu.toString(), divNum);
-            this.key = result.toBigInteger().longValue();
+            this.artworkIndexId = result.toBigInteger().longValue();
             return;
         }
-        this.key = Long.valueOf(sbu.toString());
+        this.artworkIndexId = Long.valueOf(sbu.toString());
     }
 }
