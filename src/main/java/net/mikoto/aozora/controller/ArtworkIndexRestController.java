@@ -51,7 +51,6 @@ public class ArtworkIndexRestController {
         QueryWrapper<ArtworkIndex> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("distinct artwork_id");
         queryWrapper.eq("artwork_index_id", ArtworkIndex.getId(key));
-        System.out.println(ArtworkIndex.getId(key));
         queryWrapper.le("grading", grading + 1);
 
         Page<ArtworkIndex> artworkIndexPage = new Page<>(page, 12);

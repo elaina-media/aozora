@@ -36,7 +36,7 @@ public class ArtworkMultipleTask implements MultipleTask {
     // Artwork prop
     private final Integer startId;
     private final Integer endId;
-    private final Integer lookCount;
+    private final Integer loopCount;
     private int doneWorkCount;
     private int totalNotNullWorkCount;
     private int totalNullWorkCount;
@@ -49,10 +49,10 @@ public class ArtworkMultipleTask implements MultipleTask {
 
     private final Set<Artwork> cache = new HashSet<>();
 
-    public ArtworkMultipleTask(Integer startId, Integer endId, Integer lookCount) {
+    public ArtworkMultipleTask(Integer startId, Integer endId, Integer loopCount) {
         this.startId = startId;
         this.endId = endId;
-        this.lookCount = lookCount;
+        this.loopCount = loopCount;
         this.taskId = IdUtil.getSnowflakeNextId();
         this.startDate = new Date();
         log.info("ArtworkMultipleTask成功装载于: " + taskId);
@@ -171,6 +171,6 @@ public class ArtworkMultipleTask implements MultipleTask {
 
     @Override
     public int getLoopCount() {
-        return lookCount;
+        return loopCount;
     }
 }

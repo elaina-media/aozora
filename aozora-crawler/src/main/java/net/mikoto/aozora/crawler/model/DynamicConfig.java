@@ -18,5 +18,6 @@ import lombok.Data;
 )
 public class DynamicConfig {
     String[] cookies;
+
     String cpsVersion;
 }
