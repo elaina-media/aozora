@@ -1,6 +1,8 @@
 package net.mikoto.aozora.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.service.IService;
 import net.mikoto.aozora.model.ArtworkIndex;
 
 /**
@@ -9,4 +11,5 @@ import net.mikoto.aozora.model.ArtworkIndex;
  * Create for aozora
  */
 public interface ArtworkIndexService extends IService<ArtworkIndex> {
+    Page<Integer> getArtworksPaginate(int size, int page, String orderingColumn, String orderingType, QueryWrapper queryWrapper);
 }

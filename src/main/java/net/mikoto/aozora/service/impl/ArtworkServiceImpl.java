@@ -3,8 +3,8 @@ package net.mikoto.aozora.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dtflys.forest.exceptions.ForestNetworkException;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -17,7 +17,6 @@ import net.mikoto.aozora.model.ExtensionTag;
 import net.mikoto.aozora.service.ArtworkService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
@@ -96,7 +95,7 @@ public class ArtworkServiceImpl
 
     @Override
     public ExtensionTag[] getExtensionTags(String tag, String lang) {
-        String rawData = pixivClient.getCps(tag, lang, cpsVersion);
+        String rawData = pixivClient.getCps(tag, lang);
         JSONObject cps = JSON.parseObject(rawData);
         JSONArray tags = cps.getJSONArray("candidates");
         ExtensionTag[] extensionTags = new ExtensionTag[tags.size()];

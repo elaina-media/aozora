@@ -1,23 +1,23 @@
 package net.mikoto.aozora.controller;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
-import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import net.mikoto.aozora.AozoraApplicationProperties;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryChain;
 import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.model.ArtworkIndex;
 import net.mikoto.aozora.model.DynamicConfig;
+import net.mikoto.aozora.service.ArtworkIndexService;
 import net.mikoto.aozora.service.ArtworkService;
+import net.mikoto.aozora.utils.TimeCost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Objects;
+
+import static net.mikoto.aozora.model.table.Tables.ARTWORK_INDEX;
 
 /**
  * @author mikoto
@@ -28,110 +28,89 @@ import java.util.Objects;
 @RequestMapping("/api/artwork")
 public class ArtworkRestController {
     private final ArtworkService artworkService;
+    private final DynamicConfig dynamicConfig;
+    private final ArtworkIndexService artworkIndexService;
 
     @Autowired
-    public ArtworkRestController(ArtworkService artworkService) {
+    public ArtworkRestController(ArtworkService artworkService, DynamicConfig dynamicConfig, ArtworkIndexService artworkIndexService) {
         this.artworkService = artworkService;
+        this.dynamicConfig = dynamicConfig;
+        this.artworkIndexService = artworkIndexService;
     }
 
     @RequestMapping("/getRemoteArtwork")
-    public JSONObject getRemoteArtwork(@RequestParam int artworkId) {
-        System.out.println(AozoraApplicationProperties.dynamicConfig.getCpsVersion());
-        System.out.println(Arrays.toString(AozoraApplicationProperties.dynamicConfig.getCookies()));
-        return JSONObject.from(artworkService.getRemoteArtwork(artworkId));
-    }
-    @RequestMapping("/getRemoteArtworkAndSave")
-    public JSONObject getRemoteArtworkAndSave(@RequestParam int artworkId) {
-        Date startDate = new Date();
+    public JSONObject getRemoteArtwork(@RequestParam final int artworkId,
+                                       @RequestParam final boolean isSave) {
         JSONObject result = new JSONObject();
-        Artwork artwork = artworkService.getRemoteArtwork(artworkId);
-        artworkService.saveOrUpdate(artwork);
-        result.put("success", true);
-        result.put("msg", "");
-        result.put("body", JSONObject.from(artwork));
-        Date endDate = new Date();
-        result.put("timeCost", ((double) (endDate.getTime() - startDate.getTime()) / 1000.00) + "s");
+        result.put(
+                "timeCost",
+                ((TimeCost) () -> {
+
+                    Artwork artwork = artworkService.getRemoteArtwork(artworkId);
+                    result.put("body", JSONObject.from(artwork));
+
+                    if (isSave && artwork != null) {
+                        artworkService.saveOrUpdate(artwork);
+                    }
+
+                }).getTimeCost()
+        );
         return result;
     }
 
     @RequestMapping("/getArtworksCount")
     public JSONObject getArtworksCount() {
-        Date startDate = new Date();
         JSONObject result = new JSONObject();
-        result.put("success", true);
-        result.put("msg", "");
-        result.put("body", artworkService.count());
-        Date endDate = new Date();
-        result.put("timeCost", ((double) (endDate.getTime() - startDate.getTime()) / 1000.00) + "s");
+        result.put(
+                "timeCost",
+                ((TimeCost) () -> result.put("body", artworkService.count())).getTimeCost()
+        );
         return result;
     }
 
-    @RequestMapping("/getArtworksByKeys")
-    public JSONObject getArtworksByKeys(@RequestParam int page,
-                                        @RequestParam String keys,
-                                        @RequestParam String column,
-                                        @RequestParam String type,
-                                        @RequestParam int grading) {
-        if ("".equals(keys)) {
-            return getArtworks(page, column, type, grading);
-        }
-        Date startDate = new Date();
+    @RequestMapping("/getArtworks/{key}/{page}")
+    public JSONObject getArtworks(@PathVariable final String key,
+                                  @PathVariable final int page,
+                                  @RequestParam final String orderingColumn,
+                                  @RequestParam final String orderingType,
+                                  @RequestParam final int grading) {
         JSONObject result = new JSONObject();
-        if (SqlInjectionUtils.check(column) || SqlInjectionUtils.check(keys)) {
-            result.put("success", false);
-            result.put("msg", "Injections in column or tags");
-            return result;
-        }
-        QueryWrapper<Artwork> queryWrapper = new QueryWrapper<>();
-        queryWrapper.inSql("grading", "select grading where grading <= " + grading);
-        queryWrapper.like("tags", keys).or().like("artwork_title", keys);
 
-        Page<Artwork> artworkPage = new Page<>(page, 12);
-        artworkPage.addOrder(new OrderItem(column, "asc".equals(type)));
-        Page<Artwork> resultArtworkPage = artworkService.page(artworkPage, queryWrapper);
 
-        if (resultArtworkPage.getSize() == 0) {
-            result.put("success", false);
-            result.put("msg", "Page is out of index or unaviliable grading or column");
-        } else {
-            result.put("success", true);
-            result.put("msg", "");
-        }
-        result.put("body", resultArtworkPage.getRecords());
-        Date endDate = new Date();
-        result.put("timeCost", ((double) (endDate.getTime() - startDate.getTime()) / 1000.00) + "s");
-        return result;
-    }
+        result.put(
+                "timeCost",
+                ((TimeCost) () -> {
 
-    @RequestMapping("/getArtworks")
-    public JSONObject getArtworks(@RequestParam int page,
-                                  @RequestParam String column,
-                                  @RequestParam String type,
-                                  @RequestParam int grading) {
-        Date startDate = new Date();
-        JSONObject result = new JSONObject();
-        if (SqlInjectionUtils.check(column)) {
-            result.put("success", false);
-            result.put("msg", "Injections in column");
-            return result;
-        }
-        QueryWrapper<Artwork> queryWrapper = new QueryWrapper<>();
-        queryWrapper.le("grading", grading + 1);
+                    Page<Integer> artworkPage;
+                    QueryChain<ArtworkIndex> artworkIndexMapperQueryChain =
+                            // 共有条件
+                            QueryChain.of(ArtworkIndex.class)
+                                    .select(ARTWORK_INDEX.ARTWORK_ID)
+                                    .le(ArtworkIndex::getGrading, grading + 1)
+                                    .orderBy(orderingColumn, "asc".equals(orderingType));
 
-        Page<Artwork> artworkPage = new Page<>(page, 12);
-        artworkPage.addOrder(new OrderItem(column, "asc".equals(type)));
-        Page<Artwork> resultArtworkPage = artworkService.page(artworkPage, queryWrapper);
+                    // 普通Key查询
+                    if (!"$NULL".equals(key)) {
+                        artworkIndexMapperQueryChain = artworkIndexMapperQueryChain
+                                .eq(ArtworkIndex::getArtworkIndexId, ArtworkIndex.getId(key));
+                    }
 
-        if (resultArtworkPage.getSize() == 0) {
-            result.put("success", false);
-            result.put("msg", "Page is out of index or unaviliable grading or column");
-        } else {
-            result.put("success", true);
-            result.put("msg", "");
-        }
-        result.put("body", resultArtworkPage.getRecords());
-        Date endDate = new Date();
-        result.put("timeCost", ((double) (endDate.getTime() - startDate.getTime()) / 1000.00) + "s");
+                    artworkPage = artworkIndexService.getArtworksPaginate(
+                            12, page, orderingColumn, orderingType, artworkIndexMapperQueryChain.toQueryWrapper()
+                    );
+                    if (artworkPage != null) {
+                        JSONObject body = new JSONObject();
+
+                        body.put("artworks", artworkService.listByIds(artworkPage.getRecords()));
+                        body.put("pageCount", artworkPage.getPageNumber());
+                        body.put("pageSize", artworkPage.getPageSize());
+                        body.put("totalPage", artworkPage.getTotalPage());
+
+                        result.put("body", body);
+                    }
+
+                }).getTimeCost()
+        );
         return result;
     }
 
@@ -147,11 +126,11 @@ public class ArtworkRestController {
         return result;
     }
 
-    @RequestMapping(
-            value = "/getImage",
-            produces = "image/png"
-    )
-    public byte[] getArtworkImage(@RequestParam String url) {
-        return artworkService.getImage(url);
+    @RequestMapping("/getCps")
+    public JSONObject getCps(@RequestParam String key, @RequestParam String lang) {
+        JSONObject result = new JSONObject();
+        result.put("body", artworkService.getExtensionTags(key, lang));
+        return result;
     }
+
 }

@@ -2,9 +2,9 @@ package net.mikoto.aozora.model;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -52,9 +52,9 @@ import java.util.StringJoiner;
  * );
  */
 @Data
-@TableName("`artwork`")
+@Table("artwork")
 public class Artwork {
-    @TableId
+    @Id
     private Integer artworkId;
     private String artworkTitle;
     private int authorId;
@@ -123,9 +123,9 @@ public class Artwork {
      * 2020-03-05T01:23:36+00:00
      * 2021-07-15T15:48:17+00:00
      */
-    @TableField(exist = false)
+    @Column(ignore = true)
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-    @TableField(exist = false)
+    @Column(ignore = true)
     private static final String PIXIV_IMAGE_URL = "https://i.pximg.net";
 
     @SneakyThrows

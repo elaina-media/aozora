@@ -57,7 +57,7 @@ public class H5Controller {
                                @RequestParam(value = "column", defaultValue = "bookmark_count") String column,
                                @RequestParam(value = "type", defaultValue = "desc") String type,
                                @RequestParam(value = "grading", defaultValue = "0") int grading) {
-        JSONObject result = artworkRestController.getArtworksByKeys(page, keys, column, type, grading);
+        JSONObject result = new JSONObject();
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("search");

@@ -9,13 +9,9 @@ import java.util.concurrent.LinkedTransferQueue;
  * Create for aozora
  */
 public class TaskMessageQueue {
-    private final Queue<String> queue = new LinkedTransferQueue<>()
+    private final Queue<String> queue = new LinkedTransferQueue<>();
 
     public void in(String msg) {
-
-    }
-
-    public String out() {
 
     }
 }

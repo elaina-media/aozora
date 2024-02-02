@@ -8,10 +8,7 @@ import net.mikoto.aozora.model.Artwork;
 import net.mikoto.aozora.service.ArtworkService;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

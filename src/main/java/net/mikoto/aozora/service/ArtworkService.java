@@ -1,6 +1,6 @@
 package net.mikoto.aozora.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.mybatisflex.core.service.IService;
 import net.mikoto.aozora.model.Artwork;
 import net.mikoto.aozora.model.ExtensionTag;
 

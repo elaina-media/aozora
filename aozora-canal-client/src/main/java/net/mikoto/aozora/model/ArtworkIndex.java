@@ -1,9 +1,10 @@
 package net.mikoto.aozora.model;
 
+import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,10 +20,10 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("`artwork_index`")
+@Table(value = "artwork_index")
 public class ArtworkIndex {
-    @TableId
-    private Long artworkIndexId;
+    @Id
+    private int artworkIndexId;
     private Integer artworkId;
     private Artwork.Grading grading;
     private int bookmarkCount;
@@ -30,23 +31,6 @@ public class ArtworkIndex {
     private int viewCount;
 
     public void setKey(@NotNull String key) {
-        StringBuilder sbu = new StringBuilder();
-        char[] chars = SecureUtil.md5(key).toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if(i != chars.length - 1)
-            {
-                sbu.append((int)chars[i]);
-            }
-            else {
-                sbu.append((int)chars[i]);
-            }
-        }
-        if (sbu.length() > 18) {
-            String divNum = 1 + "0".repeat(Math.max(0, sbu.length() - 18));
-            BigDecimal result = NumberUtil.div(sbu.toString(), divNum);
-            this.artworkIndexId = result.toBigInteger().longValue();
-            return;
-        }
-        this.artworkIndexId = Long.valueOf(sbu.toString());
+        this.artworkIndexId = HashUtil.bkdrHash(key);
     }
 }

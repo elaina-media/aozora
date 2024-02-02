@@ -1,6 +1,6 @@
 package net.mikoto.aozora.canalclient.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import net.mikoto.aozora.canalclient.mapper.ArtworkIndexMapper;
 import net.mikoto.aozora.canalclient.service.ArtworkIndexService;
 import net.mikoto.aozora.model.ArtworkIndex;

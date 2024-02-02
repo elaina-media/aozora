@@ -31,7 +31,6 @@ class AozoraApplicationTests {
 	void indexTest() {
 		ArtworkIndex artworkIndex = new ArtworkIndex();
 		artworkIndex.setKey("测试");
-		System.out.println(artworkIndex.getKey());
 	}
 
 }

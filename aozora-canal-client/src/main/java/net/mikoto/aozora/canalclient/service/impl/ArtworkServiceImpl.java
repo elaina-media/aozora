@@ -1,6 +1,6 @@
 package net.mikoto.aozora.canalclient.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.canalclient.mapper.ArtworkMapper;
 import net.mikoto.aozora.canalclient.service.ArtworkService;
