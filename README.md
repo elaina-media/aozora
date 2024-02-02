@@ -1,6 +1,6 @@
 # Aozora
 
-集成`SpringBoot` `MyBatis-Plus` `ShardingSphere`的现代化Pixiv集成项目
+集成`SpringBoot` `MyBatis-Flex` `ShardingSphere`的现代化Pixiv集成项目
 
 ## 已实现的功能
 
