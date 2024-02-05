@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 
+import static net.mikoto.aozora.model.table.Tables.ARTWORK;
 import static net.mikoto.aozora.model.table.Tables.ARTWORK_INDEX;
 
 /**
@@ -81,33 +82,59 @@ public class ArtworkRestController {
                 "timeCost",
                 ((TimeCost) () -> {
 
-                    Page<Integer> artworkPage;
-                    QueryChain<ArtworkIndex> artworkIndexMapperQueryChain =
-                            // 共有条件
-                            QueryChain.of(ArtworkIndex.class)
-                                    .select(ARTWORK_INDEX.ARTWORK_ID)
-                                    .le(ArtworkIndex::getGrading, grading + 1)
-                                    .orderBy(orderingColumn, "asc".equals(orderingType));
+                    // 空Key查询
+                    if ("$NULL".equals(key)) {
+                        QueryChain<Artwork> artworkMapperQueryChain =
+                                QueryChain.of(Artwork.class)
+                                        .select(ARTWORK.ALL_COLUMNS)
+                                        .le(Artwork::getGrading, grading + 1)
+                                        .orderBy(orderingColumn, "asc".equals(orderingType));
+
+                        Page<Artwork> artworkPage = new Page<>(page, 12);
+                        artworkPage = artworkService.page(artworkPage, artworkMapperQueryChain.toQueryWrapper());
+
+                        if (artworkPage != null) {
+                            JSONObject body = new JSONObject();
+
+                            body.put("artworks", artworkPage.getRecords());
+                            body.put("pageCount", artworkPage.getPageNumber());
+                            body.put("pageSize", artworkPage.getPageSize());
+                            body.put("totalPage", artworkPage.getTotalPage());
+
+                            result.put("body", body);
+                        }
+                    }
 
                     // 普通Key查询
-                    if (!"$NULL".equals(key)) {
-                        artworkIndexMapperQueryChain = artworkIndexMapperQueryChain
-                                .eq(ArtworkIndex::getArtworkIndexId, ArtworkIndex.getId(key));
+                    else {
+
+                        QueryChain<ArtworkIndex> artworkIndexMapperQueryChain =
+                                QueryChain.of(ArtworkIndex.class)
+                                        .select(ARTWORK_INDEX.ARTWORK_ID)
+                                        .le(ArtworkIndex::getGrading, grading + 1)
+                                        .orderBy(orderingColumn, "asc".equals(orderingType))
+                                        .eq(ArtworkIndex::getArtworkIndexId, ArtworkIndex.getId(key));
+
+                        Page<Integer> artworkPage = new Page<>(page, 12);
+
+                        artworkPage = artworkIndexService.pageAs(
+                                artworkPage,
+                                artworkIndexMapperQueryChain.toQueryWrapper(),
+                                Integer.class);
+
+                        if (artworkPage != null) {
+                            JSONObject body = new JSONObject();
+
+                            body.put("artworks", artworkService.listByIds(artworkPage.getRecords()));
+                            body.put("pageCount", artworkPage.getPageNumber());
+                            body.put("pageSize", artworkPage.getPageSize());
+                            body.put("totalPage", artworkPage.getTotalPage());
+
+                            result.put("body", body);
+                        }
                     }
 
-                    artworkPage = artworkIndexService.getArtworksPaginate(
-                            12, page, orderingColumn, orderingType, artworkIndexMapperQueryChain.toQueryWrapper()
-                    );
-                    if (artworkPage != null) {
-                        JSONObject body = new JSONObject();
 
-                        body.put("artworks", artworkService.listByIds(artworkPage.getRecords()));
-                        body.put("pageCount", artworkPage.getPageNumber());
-                        body.put("pageSize", artworkPage.getPageSize());
-                        body.put("totalPage", artworkPage.getTotalPage());
-
-                        result.put("body", body);
-                    }
 
                 }).getTimeCost()
         );

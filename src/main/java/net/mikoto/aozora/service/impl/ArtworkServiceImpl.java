@@ -4,6 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.dtflys.forest.exceptions.ForestNetworkException;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.CacheableServiceImpl;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +20,8 @@ import net.mikoto.aozora.model.ExtensionTag;
 import net.mikoto.aozora.service.ArtworkService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,8 +31,9 @@ import org.springframework.stereotype.Component;
  */
 @Log
 @Component
+@CacheConfig(cacheNames = "artwork")
 public class ArtworkServiceImpl
-        extends ServiceImpl<ArtworkMapper, Artwork>
+        extends CacheableServiceImpl<ArtworkMapper, Artwork>
         implements ArtworkService {
     // Beans
     private final PixivClient pixivClient;
@@ -129,5 +135,17 @@ public class ArtworkServiceImpl
         if (sessionIdCount >= config.getPhpSessionId().length) {
             sessionIdCount = 0;
         }
+    }
+
+    @Override
+    @Cacheable(key = "#root.methodName + ':' + #query.toSQL()")
+    public long count(QueryWrapper query) {
+        return super.count(query);
+    }
+
+    @Override
+    @Cacheable(key = "#root.methodName + ':' + #page.getPageSize() + ':' + #page.getPageNumber() + ':' + #query.toSQL()")
+    public <R> Page<R> pageAs(Page<R> page, QueryWrapper query, Class<R> asType) {
+        return super.pageAs(page, query, asType);
     }
 }

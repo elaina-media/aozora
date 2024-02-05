@@ -8,8 +8,8 @@ import java.util.Date;
  * Create for aozora
  */
 public interface TimeCost {
-    Date startDate = new Date();
     default double getTimeCost() {
+        Date startDate = new Date();
         run();
         return (double) (new Date().getTime() - startDate.getTime()) / 1000.00;
     }

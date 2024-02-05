@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,6 +19,7 @@ import javax.annotation.Resource;
 @MapperScan("net.mikoto.aozora.mapper")
 @ForestScan("net.mikoto.aozora.client")
 @Configuration
+@EnableCaching
 public class AozoraApplication implements WebMvcConfigurer {
 	@Resource
 	private ArtworkImageFilter artworkImageFilter;
