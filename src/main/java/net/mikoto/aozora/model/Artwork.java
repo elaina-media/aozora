@@ -112,7 +112,7 @@ public class Artwork {
                 }
             }
             throw new RuntimeException("Unsupported grading");
-        }
+        } 
     }
 
 

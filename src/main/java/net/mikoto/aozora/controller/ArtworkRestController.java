@@ -86,7 +86,7 @@ public class ArtworkRestController {
                     if ("$NULL".equals(key)) {
                         QueryChain<Artwork> artworkMapperQueryChain =
                                 QueryChain.of(Artwork.class)
-                                        .select(ARTWORK.ALL_COLUMNS)
+                                        .select(ARTWORK.DEFAULT_COLUMNS)
                                         .le(Artwork::getGrading, grading + 1)
                                         .orderBy(orderingColumn, "asc".equals(orderingType));
 
@@ -111,8 +111,8 @@ public class ArtworkRestController {
                         QueryChain<ArtworkIndex> artworkIndexMapperQueryChain =
                                 QueryChain.of(ArtworkIndex.class)
                                         .select(ARTWORK_INDEX.ARTWORK_ID)
-                                        .le(ArtworkIndex::getGrading, grading + 1)
                                         .orderBy(orderingColumn, "asc".equals(orderingType))
+                                        .le(ArtworkIndex::getGrading, grading + 1)
                                         .eq(ArtworkIndex::getArtworkIndexId, ArtworkIndex.getId(key));
 
                         Page<Integer> artworkPage = new Page<>(page, 12);
@@ -143,13 +143,12 @@ public class ArtworkRestController {
 
     @RequestMapping("/getArtwork/{artworkId}")
     public JSONObject getArtwork(@PathVariable int artworkId) {
-        Date startDate = new Date();
         JSONObject result = new JSONObject();
-        result.put("success", true);
-        result.put("msg", "");
-        result.put("body", artworkService.getById(artworkId));
-        Date endDate = new Date();
-        result.put("timeCost", ((double) (endDate.getTime() - startDate.getTime()) / 1000.00) + "s");
+
+        result.put("timeCost", ((TimeCost) () ->
+                result.put("body", artworkService.getById(artworkId))
+        ).getTimeCost());
+
         return result;
     }
 
