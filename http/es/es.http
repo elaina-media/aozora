@@ -1,0 +1,109 @@
+### Remove Index
+DELETE http://192.168.123.90:9200/aozora
+Content-Type: application/json
+
+### Create Index
+PUT http://192.168.123.90:9200/aozora
+Content-Type: application/json
+
+{
+  "mappings": {
+    "properties": {
+      "tags": {
+        "type": "text",
+        "fields": {
+          "cn": {
+            "type": "text",
+            "analyzer": "smartcn"
+          },
+          "jp": {
+            "type": "text",
+            "analyzer": "kuromoji"
+          },
+          "raw": {
+            "type": "text",
+            "analyzer": "standard"
+          }
+        },
+        "index": true
+      },
+      "artworkTitle": {
+        "type": "text",
+        "fields": {
+          "cn": {
+            "type": "text",
+            "analyzer": "smartcn"
+          },
+          "jp": {
+            "type": "text",
+            "analyzer": "kuromoji"
+          },
+          "raw": {
+            "type": "text",
+            "analyzer": "standard"
+          }
+        },
+        "index": true
+      },
+      "authorName": {
+        "type": "text",
+        "fields": {
+          "cn": {
+            "type": "text",
+            "analyzer": "smartcn"
+          },
+          "jp": {
+            "type": "text",
+            "analyzer": "kuromoji"
+          },
+          "raw": {
+            "type": "text",
+            "analyzer": "standard"
+          }
+        },
+        "index": true
+      },
+      "authorId": {
+        "type": "long",
+        "index": true
+      },
+      "seriesId": {
+        "type": "long",
+        "index": true
+      },
+      "grading": {
+        "type": "integer",
+        "index": true
+      },
+      "bookmarkCount": {
+        "type": "integer",
+        "index": true
+      },
+      "likeCount": {
+        "type": "integer",
+        "index": true
+      },
+      "viewCount": {
+        "type": "integer",
+        "index": true
+      },
+      "isAi": {
+        "type": "boolean",
+        "index": true
+      },
+      "isManga": {
+        "type": "boolean",
+        "index": true
+      },
+      "artworkId": {
+        "type": "long"
+      }
+    }
+  }
+}
+
+### Add Document
+POST http://192.168.123.90:9200/aozora/_doc
+Content-Type: application/json
+
+{}

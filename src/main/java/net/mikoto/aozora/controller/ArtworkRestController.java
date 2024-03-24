@@ -72,9 +72,9 @@ public class ArtworkRestController {
     @RequestMapping("/getArtworks/{key}/{page}")
     public JSONObject getArtworks(@PathVariable final String key,
                                   @PathVariable final int page,
-                                  @RequestParam final String orderingColumn,
-                                  @RequestParam final String orderingType,
-                                  @RequestParam final int grading) {
+                                  @RequestParam(defaultValue = "bookmark_count") final String orderingColumn,
+                                  @RequestParam(defaultValue = "desc") final String orderingType,
+                                  @RequestParam(defaultValue = "0") final int grading) {
         JSONObject result = new JSONObject();
 
 

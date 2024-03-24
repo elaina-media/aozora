@@ -81,6 +81,8 @@ public class Artwork {
     private String nextArtworkTitle = null;
     private int previousArtworkId = 0;
     private String previousArtworkTitle = null;
+    private boolean isAi;
+    private boolean isManga;
 
     @Getter
     public enum Grading {

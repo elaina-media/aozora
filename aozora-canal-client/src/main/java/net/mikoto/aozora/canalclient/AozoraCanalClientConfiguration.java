@@ -1,11 +1,11 @@
 package net.mikoto.aozora.canalclient;
 
-import com.alibaba.otter.canal.client.CanalConnector;
-import com.alibaba.otter.canal.client.CanalConnectors;
+import net.mikoto.aozora.canalclient.client.ElasticSearchClient;
+import net.mikoto.aozora.canalclient.client.support.BeginningSupport;
+import net.mikoto.aozora.canalclient.client.support.ElasticSearchSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.net.InetSocketAddress;
 
 /**
  * @author mikoto
@@ -15,10 +15,12 @@ import java.net.InetSocketAddress;
 @Configuration
 public class AozoraCanalClientConfiguration {
     @Bean
-    public CanalConnector canalConnector() {
-        return CanalConnectors.newSingleConnector(
-                new InetSocketAddress("192.168.123.90", 11111),
-                "aozora", "", ""
-        );
+    public ElasticSearchSupport elasticSearchSupport(ElasticSearchClient elasticSearchClient) {
+        return new ElasticSearchSupport(null, elasticSearchClient);
+    }
+
+    @Bean
+    public BeginningSupport beginningSupport(ElasticSearchSupport elasticSearchSupport) {
+        return new BeginningSupport(elasticSearchSupport);
     }
 }

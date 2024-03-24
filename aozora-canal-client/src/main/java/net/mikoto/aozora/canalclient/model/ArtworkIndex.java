@@ -1,12 +1,9 @@
-package net.mikoto.aozora.model;
+package net.mikoto.aozora.canalclient.model;
 
-import cn.hutool.core.util.HashUtil;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * @author mikoto

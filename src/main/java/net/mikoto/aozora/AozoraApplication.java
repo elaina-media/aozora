@@ -4,6 +4,7 @@ import com.dtflys.forest.springboot.annotation.ForestScan;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import net.mikoto.aozora.interceptor.ArtworkImageFilter;
+import net.mikoto.aozora.interceptor.CorsFilter;
 import org.jetbrains.annotations.NotNull;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -23,11 +24,16 @@ import javax.annotation.Resource;
 public class AozoraApplication implements WebMvcConfigurer {
 	@Resource
 	private ArtworkImageFilter artworkImageFilter;
+	@Resource
+	private CorsFilter corsFilter;
 
 	@Override
 	public void addInterceptors(@NotNull InterceptorRegistry registry) {
 		registry.addInterceptor(artworkImageFilter)
 				.addPathPatterns("/api/artwork/getImage/**");
+
+		registry.addInterceptor(corsFilter)
+				.addPathPatterns("/**");
 	}
 
 	public static void main(String[] args) {
