@@ -17,20 +17,18 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // Database
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2'
-    implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.3.1'
+    implementation 'com.mybatis-flex:mybatis-flex-spring-boot-starter:1.7.7'
     implementation 'mysql:mysql-connector-java:8.0.32'
     implementation 'org.apache.shardingsphere:shardingsphere-jdbc-core-spring-boot-starter:5.2.1'
 
     // Utils
-    implementation 'com.dtflys.forest:forest-spring-boot-starter:1.5.33'
+    implementation 'com.dtflys.forest:forest-spring-boot3-starter:1.5.35'
     implementation 'com.alibaba:fastjson:2.0.24'
     implementation 'org.jetbrains:annotations:23.0.0'
-    implementation 'cn.hutool:hutool-all:5.8.16'
 
     // Config
     implementation 'com.alibaba.boot:nacos-config-spring-boot-starter:0.3.0-RC'

@@ -1,12 +1,9 @@
-package net.mikoto.aozora.crawler.model.tasks;
+package net.mikoto.aozora.crawler.tasks;
 
-import cn.hutool.cron.task.Task;
-import com.alibaba.fastjson2.JSONObject;
 import com.dtflys.forest.exceptions.ForestRuntimeException;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import net.mikoto.aozora.client.PixivClient;
 import net.mikoto.aozora.crawler.model.Observer;
 import net.mikoto.aozora.crawler.service.ArtworkService;
 import net.mikoto.aozora.model.Artwork;
@@ -23,12 +20,9 @@ import java.util.Set;
  *
  */
 @Log
-public class PatchArtworkTask implements Task, Observer {
+public class PatchArtworkTask implements Runnable, Observer {
     @Setter
     private ArtworkService artworkService;
-    @Setter
-    private PixivClient pixivClient;
-
 
     private final int beginningArtwork;
     private final int endingArtwork;
@@ -38,19 +32,35 @@ public class PatchArtworkTask implements Task, Observer {
     private int notNullWorkCount;
     private int nullWorkCount;
     private final Set<Artwork> cache = new HashSet<>();
+    private final int cacheSize;
+    private final int delay;
 
-    public PatchArtworkTask(String beginningArtwork, String endingArtwork) {
+    private long startTime;
+    private int totalQps;
+
+    private int currentQps;
+    private int currentGetCount;
+    private long currentStartTime;
+    private long currentLastGetTime;
+
+    public PatchArtworkTask(String beginningArtwork, String endingArtwork, String cacheSize, String delay) {
         this.beginningArtwork = Integer.parseInt(beginningArtwork);
         this.endingArtwork = Integer.parseInt(endingArtwork);
+        this.cacheSize = Integer.parseInt(cacheSize);
+        this.delay = Integer.parseInt(delay);
     }
 
+    @SneakyThrows
     @Override
-    public void execute() {
+    public void run() {
+        startTime = System.currentTimeMillis();
+        currentStartTime = startTime;
+
         while (beginningArtwork + doneWorkCount <= endingArtwork) {
             int artworkId = beginningArtwork + doneWorkCount;
             Artwork artwork = doGetArtwork(artworkId);
             if (cache.isEmpty() && nullWorkCount == 0) {
-                log.info("缓存计数器位于: " + artworkId + " -> " + (artworkId + 100));
+                log.info("缓存计数器位于: " + artworkId + " -> " + (artworkId + cacheSize));
             }
 
             if (artwork != null) {
@@ -64,8 +74,15 @@ public class PatchArtworkTask implements Task, Observer {
                 nullWorkCount++;
             }
             doneWorkCount++;
-            if (cache.size() >= 100) {
-                artworkService.saveOrUpdateBatch(cache);
+            if (cache.size() >= cacheSize) {
+                for (Artwork cachedArtwork : cache) {
+                    Artwork storagedArtwork = artworkService.getById(cachedArtwork.getArtworkId());
+                    if (storagedArtwork == null) {
+                        artworkService.save(cachedArtwork);
+                    } else {
+                        artworkService.updateById(cachedArtwork);
+                    }
+                }
                 cache.clear();
                 log.info("缓存更新于: " + artworkId);
                 System.out.println("    总作业范围：" + beginningArtwork + " -> " + endingArtwork);
@@ -86,6 +103,18 @@ public class PatchArtworkTask implements Task, Observer {
                 notNullWorkCount = 0;
                 nullWorkCount = 0;
             }
+
+            currentLastGetTime = System.currentTimeMillis();
+            currentGetCount++;
+            if (currentLastGetTime - startTime > 1000) {
+                currentQps = currentGetCount + 1;
+                currentStartTime = currentLastGetTime;
+                currentGetCount = 0;
+            }
+
+            totalQps = doneWorkCount;
+
+            Thread.sleep(delay);
         }
     }
 
@@ -93,8 +122,7 @@ public class PatchArtworkTask implements Task, Observer {
     private Artwork doGetArtwork(int artworkId) {
         Artwork artwork = null;
         try {
-            JSONObject rawJsonArtworkData = JSONObject.parseObject(pixivClient.getArtwork(artworkId));
-            artwork = Artwork.parseFromRawJson(rawJsonArtworkData);
+            artwork = artworkService.getRemoteArtwork(artworkId);
         } catch (ForestRuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 log.info("任务中断于：" + artworkId);

@@ -1,4 +1,4 @@
-package net.mikoto.aozora.client.interceptor;
+package net.mikoto.aozora.crawler.client.interceptor;
 
 import com.dtflys.forest.http.ForestRequest;
 import com.dtflys.forest.interceptor.Interceptor;

@@ -1,8 +1,5 @@
 package net.mikoto.aozora.crawler.service.impl;
 
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.cron.CronUtil;
-import cn.hutool.cron.task.Task;
 import lombok.SneakyThrows;
 import net.mikoto.aozora.crawler.AozoraCrawlerApplicationContextGetter;
 import net.mikoto.aozora.crawler.manager.TaskManager;
@@ -13,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author mikoto
@@ -23,6 +22,8 @@ import java.lang.reflect.Method;
 public class TaskServiceImpl implements TaskService {
     private final TaskManager taskManager;
     private final AozoraCrawlerApplicationContextGetter contextGetter;
+    private int lastId = 1;
+    private final Map<Integer, Thread> threadMap = new ConcurrentHashMap<>();
 
     @Autowired
     public TaskServiceImpl(TaskManager taskManager, AozoraCrawlerApplicationContextGetter contextGetter) {
@@ -32,43 +33,38 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @SneakyThrows
-    public String scheduleTask(String pattern, String taskName, String[] beanNames, Object[] params) {
-        Class<? extends Task> taskClass = taskManager.getTask(taskName);
+    public int scheduleTask(String taskName, String[] beanNames, Object[] params) {
+        Class<? extends Runnable> taskClass = taskManager.getTask(taskName);
         if (taskClass.getConstructors().length != 1) {
-            return null;
+            return 0;
         }
         Constructor<?> taskConstructor = taskClass.getConstructors()[0];
-        Task task = (Task) taskConstructor.newInstance(params);
+        Runnable task = (Runnable) taskConstructor.newInstance(params);
         for (String beanName : beanNames) {
-            Object bean = contextGetter.getApplicationContext().getBean(beanName);
-            Method setBean = taskClass.getMethod("set" + beanName, bean.getClass());
+            Class<?> beanClass = Class.forName(beanName);
+            Object bean = contextGetter.getApplicationContext().getBean(beanClass);
+            Method setBean = taskClass.getMethod("set" + beanClass.getSimpleName(), beanClass);
             setBean.invoke(task, bean);
         }
-        return scheduleTask(pattern, task);
+        return scheduleTask(task);
     }
 
     @Override
-    public String scheduleTask(String pattern, Task task) {
-        String id = IdUtil.nanoId();
-        CronUtil.schedule(id, pattern, task);
+    public int scheduleTask(@NotNull Runnable task) {
+        int id = lastId;
+        lastId++;
+        threadMap.put(id, new Thread(task));
         return id;
     }
 
     @Override
-    public String scheduleTask(String pattern, @NotNull Runnable task) {
-        String id = IdUtil.nanoId();
-        CronUtil.schedule(id, pattern, task::run);
-        return id;
+    public void run(int id) {
+        threadMap.get(id).start();
     }
 
     @Override
-    public void run() {
-        CronUtil.start(true);
-    }
-
-    @Override
-    public void stop() {
-        CronUtil.stop();
+    public void stop(int id) {
+        threadMap.get(id).interrupt();
     }
 
 }

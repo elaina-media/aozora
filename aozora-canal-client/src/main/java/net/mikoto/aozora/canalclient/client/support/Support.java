@@ -21,8 +21,6 @@ public abstract class Support {
     public final void support(JSONObject before, JSONObject after) {
         if (!resolve(before, after) && next != null) {
             next.support(before, after);
-        } else {
-            log.warning("Solved failed");
         }
     }
 

@@ -114,7 +114,7 @@ public class Artwork {
                 }
             }
             throw new RuntimeException("Unsupported grading");
-        } 
+        }
     }
 
 
@@ -163,7 +163,7 @@ public class Artwork {
         artwork.setIllustUrlThumb(urls.getString("thumb").replace(PIXIV_IMAGE_URL, ""));
         artwork.setIllustUrlSmall(urls.getString("small").replace(PIXIV_IMAGE_URL, ""));
         // 年龄分级
-        Artwork.Grading grading = Artwork.Grading.General;
+        Grading grading = Grading.General;
         // 标签
         StringJoiner tags = new StringJoiner(";");
         JSONArray tagsArray = artworkBodyRawData
@@ -173,9 +173,9 @@ public class Artwork {
             String tag = tagsArray.getJSONObject(i).getString("tag");
             // 年龄分级判断
             if ("R-18".equals(tag)) {
-                grading = Artwork.Grading.R18;
+                grading = Grading.R18;
             } else if ("R-18G".equals(tag)) {
-                grading = Artwork.Grading.R18G;
+                grading = Grading.R18G;
             }
 
             // 标签收集
@@ -184,6 +184,9 @@ public class Artwork {
         artwork.setGrading(grading);
         artwork.setTags(tags.toString());
 
+        // AI判断、漫画判断
+        artwork.setAi(2 == artworkBodyRawData.getIntValue("aiType"));
+        artwork.setManga(artwork.getTags().contains("漫画"));
         // 系列作品数据
         JSONObject seriesJson = artworkRawData.getJSONObject("seriesNavData");
 

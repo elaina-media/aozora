@@ -1,6 +1,5 @@
 package net.mikoto.aozora.crawler.manager;
 
-import cn.hutool.cron.task.Task;
 
 /**
  * @author mikoto
@@ -8,6 +7,6 @@ import cn.hutool.cron.task.Task;
  * Create for aozora
  */
 public interface TaskManager {
-    Class<? extends Task> getTask(String name);
-    void registerTask(String name, Class<? extends Task> clazz);
+    Class<? extends Runnable> getTask(String name);
+    void registerTask(String name, Class<? extends Runnable> clazz);
 }

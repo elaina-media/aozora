@@ -20,10 +20,21 @@ public class TaskRestController {
     }
 
     @RequestMapping("/create")
-    public JSONObject create(String pattern, String taskName, String beanNames, String taskParams) {
+    public JSONObject create(String taskName, String beanNames, String taskParams) {
         JSONObject result = new JSONObject();
-        String id = taskService.scheduleTask(pattern, taskName, beanNames.split(","), taskParams.split(","));
+        int id = taskService.scheduleTask(taskName, beanNames.split(","), taskParams.split(","));
         result.put("taskId", id);
         return result;
+    }
+
+    @RequestMapping("/run")
+    public void run(int taskId) {
+        taskService.run(taskId);
+    }
+
+
+    @RequestMapping("/stop")
+    public void stop(int taskId) {
+        taskService.stop(taskId);
     }
 }

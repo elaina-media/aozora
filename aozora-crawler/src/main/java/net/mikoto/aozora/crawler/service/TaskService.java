@@ -1,6 +1,5 @@
 package net.mikoto.aozora.crawler.service;
 
-import cn.hutool.cron.task.Task;
 
 /**
  * @author mikoto
@@ -8,9 +7,8 @@ import cn.hutool.cron.task.Task;
  * Create for aozora
  */
 public interface TaskService {
-    String scheduleTask(String pattern, String taskName, String[] beanNames, Object[] params);
-    String scheduleTask(String pattern, Task task);
-    String scheduleTask(String pattern, Runnable task);
-    void run();
-    void stop();
+    int scheduleTask(String taskName, String[] beanNames, Object[] params);
+    int scheduleTask(Runnable task);
+    void run(int taskId);
+    void stop(int taskId);
 }

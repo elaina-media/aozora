@@ -1,6 +1,6 @@
 package net.mikoto.aozora.crawler.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mybatisflex.core.BaseMapper;
 import net.mikoto.aozora.model.Artwork;
 
 /**

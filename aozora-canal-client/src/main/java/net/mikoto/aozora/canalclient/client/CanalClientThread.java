@@ -27,6 +27,8 @@ import java.util.List;
 public class CanalClientThread implements Runnable {
     private final Config config;
     private final BeginningSupport beginningSupport;
+    private int insertCount = 0;
+    private int deleteCount = 0;
 
     @Autowired
     public CanalClientThread(Config config, BeginningSupport support) {
@@ -46,7 +48,7 @@ public class CanalClientThread implements Runnable {
             List<CanalEntry.Entry> entries = message.getEntries();
 
             if (entries.isEmpty()) {
-                Thread.sleep(5000);
+                Thread.sleep(500);
                 continue;
             }
 
@@ -87,6 +89,9 @@ public class CanalClientThread implements Runnable {
 
                     if (!eventType.name().equals("DELETE")) {
                         beginningSupport.support(beforeData, afterData);
+                        insertCount++;
+                    } else {
+                        deleteCount++;
                     }
                 }
             }

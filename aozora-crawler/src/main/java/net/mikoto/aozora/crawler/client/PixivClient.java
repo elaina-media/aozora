@@ -1,22 +1,26 @@
-package net.mikoto.aozora.client;
+package net.mikoto.aozora.crawler.client;
 
 import com.dtflys.forest.annotation.BaseRequest;
 import com.dtflys.forest.annotation.Get;
 import com.dtflys.forest.annotation.Var;
-import net.mikoto.aozora.client.interceptor.CookieInterceptor;
-import net.mikoto.aozora.client.interceptor.CpsVersionInterceptor;
+import net.mikoto.aozora.crawler.client.interceptor.CookieInterceptor;
+import net.mikoto.aozora.crawler.client.interceptor.CpsVersionInterceptor;
+import org.springframework.stereotype.Component;
 
 /**
  * @author mikoto
  * &#064;date 2023/11/16
  * Create for aozora
  */
+@Component
 @BaseRequest(baseURL = "https://www.pixiv.net")
 public interface PixivClient {
     @Get(
             url = "/ajax/illust/{artworkId}",
             headers = {
                     "Host: www.pixiv.net",
+                    "Accept: application/json",
+                    "Referer: https://www.pixiv.net/artworks/{artworkId}"
             },
             userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
             interceptor = CookieInterceptor.class
