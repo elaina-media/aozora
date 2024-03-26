@@ -107,3 +107,15 @@ POST http://192.168.123.90:9200/aozora/_doc
 Content-Type: application/json
 
 {}
+
+### Search Document
+POST http://192.168.123.90:9200/aozora/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match": {
+      "tags.cn": "R-18"
+    }
+  }
+}
