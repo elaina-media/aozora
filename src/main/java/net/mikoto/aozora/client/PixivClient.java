@@ -19,6 +19,8 @@ public interface PixivClient {
             url = "/ajax/illust/{artworkId}",
             headers = {
                     "Host: www.pixiv.net",
+                    "Accept: application/json",
+                    "Referer: https://www.pixiv.net/artworks/{artworkId}"
             },
             userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
             interceptor = CookieInterceptor.class
