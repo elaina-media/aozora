@@ -1,6 +1,7 @@
 package net.mikoto.aozora.client;
 
 import com.dtflys.forest.annotation.BaseRequest;
+import com.dtflys.forest.annotation.Get;
 import com.dtflys.forest.annotation.JSONBody;
 import com.dtflys.forest.annotation.Post;
 import org.springframework.stereotype.Component;
@@ -19,4 +20,9 @@ public interface ElasticSearchClient {
             "_search"
     )
     String search(@JSONBody String searchJson);
+
+    @Get(
+          "_cat/count/aozora"
+    )
+    String getCount();
 }

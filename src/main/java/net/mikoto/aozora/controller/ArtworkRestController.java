@@ -39,7 +39,6 @@ public class ArtworkRestController {
         result.put(
                 "timeCost",
                 ((TimeCost) () -> {
-
                     Artwork artwork = artworkService.getRemoteArtwork(artworkId);
                     result.put("body", JSONObject.from(artwork));
 

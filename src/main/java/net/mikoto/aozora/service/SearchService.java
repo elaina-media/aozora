@@ -18,4 +18,6 @@ public interface SearchService {
             int size,
             int page
     );
+
+    int artworkCount();
 }
