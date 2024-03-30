@@ -1,13 +1,10 @@
 package net.mikoto.aozora.controller;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.QueryChain;
 import net.mikoto.aozora.model.Artwork;
-import net.mikoto.aozora.model.ArtworkIndex;
-import net.mikoto.aozora.model.DynamicConfig;
-import net.mikoto.aozora.service.ArtworkIndexService;
 import net.mikoto.aozora.service.ArtworkService;
+import net.mikoto.aozora.service.SearchService;
 import net.mikoto.aozora.utils.TimeCost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,10 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-
-import static net.mikoto.aozora.model.table.Tables.ARTWORK;
-import static net.mikoto.aozora.model.table.Tables.ARTWORK_INDEX;
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * @author mikoto
@@ -29,14 +24,12 @@ import static net.mikoto.aozora.model.table.Tables.ARTWORK_INDEX;
 @RequestMapping("/api/artwork")
 public class ArtworkRestController {
     private final ArtworkService artworkService;
-    private final DynamicConfig dynamicConfig;
-    private final ArtworkIndexService artworkIndexService;
+    private final SearchService searchService;
 
     @Autowired
-    public ArtworkRestController(ArtworkService artworkService, DynamicConfig dynamicConfig, ArtworkIndexService artworkIndexService) {
+    public ArtworkRestController(ArtworkService artworkService, SearchService searchService) {
         this.artworkService = artworkService;
-        this.dynamicConfig = dynamicConfig;
-        this.artworkIndexService = artworkIndexService;
+        this.searchService = searchService;
     }
 
     @RequestMapping("/getRemoteArtwork")
@@ -51,7 +44,12 @@ public class ArtworkRestController {
                     result.put("body", JSONObject.from(artwork));
 
                     if (isSave && artwork != null) {
-                        artworkService.saveOrUpdate(artwork);
+                        Artwork storagedArtwork = artworkService.getById(artwork.getArtworkId());
+                        if (storagedArtwork == null) {
+                            artworkService.save(artwork);
+                        } else {
+                            artworkService.updateById(artwork);
+                        }
                     }
 
                 }).getTimeCost()
@@ -72,9 +70,11 @@ public class ArtworkRestController {
     @RequestMapping("/getArtworks/{key}/{page}")
     public JSONObject getArtworks(@PathVariable final String key,
                                   @PathVariable final int page,
-                                  @RequestParam(defaultValue = "bookmark_count") final String orderingColumn,
+                                  @RequestParam(defaultValue = "bookmarkCount") final String orderingColumn,
                                   @RequestParam(defaultValue = "desc") final String orderingType,
-                                  @RequestParam(defaultValue = "0") final int grading) {
+                                  @RequestParam(defaultValue = "1") final int grading,
+                                  @RequestParam(defaultValue = "false") final boolean isAi,
+                                  @RequestParam(defaultValue = "false") final boolean isManga) {
         JSONObject result = new JSONObject();
 
 
@@ -82,60 +82,11 @@ public class ArtworkRestController {
                 "timeCost",
                 ((TimeCost) () -> {
 
-                    // 空Key查询
-                    if ("$NULL".equals(key)) {
-                        QueryChain<Artwork> artworkMapperQueryChain =
-                                QueryChain.of(Artwork.class)
-                                        .select(ARTWORK.DEFAULT_COLUMNS)
-                                        .le(Artwork::getGrading, grading + 1)
-                                        .orderBy(orderingColumn, "asc".equals(orderingType));
 
-                        Page<Artwork> artworkPage = new Page<>(page, 12);
-                        artworkPage = artworkService.page(artworkPage, artworkMapperQueryChain.toQueryWrapper());
+                    List<Integer> artworkIds = searchService.search(key, grading, isAi, isManga, orderingType, orderingColumn, 12, page);
+                    List<Artwork> artworks = artworkService.listByIds(artworkIds);
 
-                        if (artworkPage != null) {
-                            JSONObject body = new JSONObject();
-
-                            body.put("artworks", artworkPage.getRecords());
-                            body.put("pageCount", artworkPage.getPageNumber());
-                            body.put("pageSize", artworkPage.getPageSize());
-                            body.put("totalPage", artworkPage.getTotalPage());
-
-                            result.put("body", body);
-                        }
-                    }
-
-                    // 普通Key查询
-                    else {
-
-                        QueryChain<ArtworkIndex> artworkIndexMapperQueryChain =
-                                QueryChain.of(ArtworkIndex.class)
-                                        .select(ARTWORK_INDEX.ARTWORK_ID)
-                                        .orderBy(orderingColumn, "asc".equals(orderingType))
-                                        .le(ArtworkIndex::getGrading, grading + 1)
-                                        .eq(ArtworkIndex::getArtworkIndexId, ArtworkIndex.getId(key));
-
-                        Page<Integer> artworkPage = new Page<>(page, 12);
-
-                        artworkPage = artworkIndexService.pageAs(
-                                artworkPage,
-                                artworkIndexMapperQueryChain.toQueryWrapper(),
-                                Integer.class);
-
-                        if (artworkPage != null) {
-                            JSONObject body = new JSONObject();
-
-                            body.put("artworks", artworkService.listByIds(artworkPage.getRecords()));
-                            body.put("pageCount", artworkPage.getPageNumber());
-                            body.put("pageSize", artworkPage.getPageSize());
-                            body.put("totalPage", artworkPage.getTotalPage());
-
-                            result.put("body", body);
-                        }
-                    }
-
-
-
+                    result.put("body", Artwork.orderingArtwork(orderingColumn, artworks.toArray(new Artwork[0])));
                 }).getTimeCost()
         );
         return result;

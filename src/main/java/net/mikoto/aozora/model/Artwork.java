@@ -8,9 +8,14 @@ import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -211,6 +216,31 @@ public class Artwork {
             artwork.setNextArtworkTitle(nextJson.getString("title"));
         }
         return artwork;
+    }
+
+    @Contract("_, _ -> param2")
+    @SneakyThrows
+    public static Artwork[] orderingArtwork(@NotNull String field, Artwork @NotNull [] artworks) {
+        Method orderingColumnGetMethod = Artwork.class.getMethod("get" + field.substring(0, 1).toUpperCase() + field.substring(1));
+
+        int i, j;
+        int flag;
+        for (i = artworks.length - 1; i > 0; i--) {
+            flag = 0;
+            for (j = 0; j < i; j++) {
+                if ((int) orderingColumnGetMethod.invoke(artworks[j]) <
+                                (int) orderingColumnGetMethod.invoke(artworks[j + 1])) {
+                    Artwork tmp = artworks[j];
+                    artworks[j] = artworks[j + 1];
+                    artworks[j + 1] = tmp;
+                    flag = 1;
+                }
+            }
+            if (flag == 0)
+                break;
+        }
+
+        return artworks;
     }
 }
 

@@ -2,7 +2,6 @@ package net.mikoto.aozora;
 
 import lombok.extern.log4j.Log4j2;
 import net.mikoto.aozora.mapper.ArtworkMapper;
-import net.mikoto.aozora.model.ArtworkIndex;
 import net.mikoto.aozora.service.ArtworkService;
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,6 @@
 package net.mikoto.aozora.utils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 /**

@@ -35,6 +35,7 @@ public class ElasticSearchSupport extends Support {
         artworkIndex.setViewCount(Integer.parseInt(after.getString("view_count")));
         artworkIndex.setAi("1".equals(after.getString("is_ai")));
         artworkIndex.setManga("1".equals(after.getString("is_manga")));
+        artworkIndex.setArtworkId(after.getIntValue("artwork_id"));
 
         log.info(elasticSearchClient.createIndex(artworkIndex));
         return true;

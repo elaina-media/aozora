@@ -10,10 +10,9 @@ import net.mikoto.aozora.model.ExtensionTag;
  * Create for aozora
  */
 public interface ArtworkService extends IService<Artwork> {
-    Artwork getRemoteArtwork(int artworkId, String sessionId);
     Artwork getRemoteArtwork(int artworkId);
-    byte[] getImage(String url);
     ExtensionTag[] getExtensionTags(String tag, String lang);
+    byte[] getImage(String url);
     int getCachedArtworksCount();
     void setCachedArtworksCount(int artworksCount);
 

@@ -7,18 +7,15 @@ import com.dtflys.forest.exceptions.ForestNetworkException;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.CacheableServiceImpl;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.client.PixivClient;
 import net.mikoto.aozora.mapper.ArtworkMapper;
-import net.mikoto.aozora.model.AozoraConfig;
 import net.mikoto.aozora.model.Artwork;
 import net.mikoto.aozora.model.ExtensionTag;
 import net.mikoto.aozora.service.ArtworkService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -44,66 +41,36 @@ public class ArtworkServiceImpl
         implements ArtworkService {
     // Beans
     private final PixivClient pixivClient;
-    private final AozoraConfig defaultConfig;
-    private static int sessionIdCount = 0;
-    private static int getCount = 0;
     @Getter @Setter
     private int cachedArtworksCount;
 
-
-    // Dynamic configs
-    private String[] cookies;
-    private String cpsVersion;
     @Autowired
-    public ArtworkServiceImpl(PixivClient pixivClient, AozoraConfig defaultConfig) {
+    public ArtworkServiceImpl(PixivClient pixivClient) {
         this.pixivClient = pixivClient;
-        this.defaultConfig = defaultConfig;
     }
 
     @SneakyThrows
     @Override
     public Artwork getRemoteArtwork(int artworkId) {
-        // 计数器刷新&归零&切换SessionId
-        getCount++;
-        if (getCount >= 5) {
-            getCount = 0;
-            sessionIdCount++;
-            if (sessionIdCount >= defaultConfig.getPhpSessionId().length) {
-                sessionIdCount = 0;
-            }
-        }
-
         Artwork artwork;
         try {
-            artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount]);
+            String rawData = pixivClient.getArtwork(artworkId);
+            JSONObject artworkRawData = JSON.parseObject(rawData);
+            artwork = Artwork.parseFromRawJson(artworkRawData);
         } catch (ForestNetworkException e) {
             if (e.getStatusCode() == 404) {
                 return null;
             } else if (e.getStatusCode() == 429) {
-                log.info(
-                        "The session id temporary unavailable: " +
-                                defaultConfig.getPhpSessionId()[sessionIdCount] +
-                                " at artwork id :" +
-                                artworkId
-                );
-                sessionIdCount++;
-                if (sessionIdCount >= defaultConfig.getPhpSessionId().length) {
-                    sessionIdCount = 0;
-                }
                 Thread.sleep(60000);
-                log.info("Restart patch with: " + defaultConfig.getPhpSessionId()[sessionIdCount]);
-                artwork = getRemoteArtwork(artworkId, defaultConfig.getPhpSessionId()[sessionIdCount]);
+                String rawData = pixivClient.getArtwork(artworkId);
+                JSONObject artworkRawData = JSON.parseObject(rawData);
+                artwork = Artwork.parseFromRawJson(artworkRawData);
             } else {
                 throw e;
             }
         }
 
         return artwork;
-    }
-
-    @Override
-    public byte[] getImage(String url) {
-        return pixivClient.getImage(url);
     }
 
     @Override
@@ -127,21 +94,9 @@ public class ArtworkServiceImpl
         return extensionTags;
     }
 
-    @SneakyThrows
     @Override
-    public Artwork getRemoteArtwork(int artworkId, String sessionId) {
-        String rawData = pixivClient.getArtwork(artworkId);
-        JSONObject artworkRawData = JSON.parseObject(rawData);
-
-
-        return Artwork.parseFromRawJson(artworkRawData);
-    }
-
-    private void nextSessionId(@NotNull AozoraConfig config) {
-        sessionIdCount++;
-        if (sessionIdCount >= config.getPhpSessionId().length) {
-            sessionIdCount = 0;
-        }
+    public byte[] getImage(String url) {
+        return pixivClient.getImage(url);
     }
 
     @Override

@@ -113,9 +113,46 @@ POST http://192.168.123.90:9200/aozora/_search
 Content-Type: application/json
 
 {
+  "from": 0,
+  "size": 12,
   "query": {
-    "match": {
-      "tags.cn": "R-18"
+    "bool": {
+      "should": [{
+        "match": {
+          "tags": "R-18"
+        }
+      },
+        {
+          "match": {
+            "artworkTitle": "R-18"
+          }
+        }],
+      "filter": [{
+        "range": {
+          "grading": {
+            "lte": 1
+          }
+        }
+      },
+        {
+          "match": {
+            "ai": false
+          }
+        },{
+          "match": {
+            "manga": false
+          }
+        }
+      ],
+      "minimum_should_match": 1
     }
-  }
+  },
+  "sort": [{
+    "bookmarkCount": {
+      "order": "desc"
+    }
+  }]
 }
+
+### GetCount
+GET http://192.168.123.90:9200/_cat/count/aozora

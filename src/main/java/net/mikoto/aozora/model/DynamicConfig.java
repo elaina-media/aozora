@@ -3,7 +3,6 @@ package net.mikoto.aozora.model;
 import com.alibaba.nacos.api.config.ConfigType;
 import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 /**
  * @author mikoto
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
  */
 
 @Data
-@Component
 @NacosConfigurationProperties(
         dataId = "forward_client",
         type = ConfigType.JSON,
