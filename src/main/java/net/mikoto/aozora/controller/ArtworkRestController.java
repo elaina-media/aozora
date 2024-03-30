@@ -20,7 +20,7 @@ import java.util.List;
  * Create for aozora
  */
 @RestController
-@RequestMapping("/api/artwork")
+@RequestMapping("/artwork")
 public class ArtworkRestController {
     private final ArtworkService artworkService;
     private final SearchService searchService;
