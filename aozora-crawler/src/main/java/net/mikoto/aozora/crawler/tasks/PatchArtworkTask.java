@@ -6,7 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.crawler.model.Observer;
 import net.mikoto.aozora.crawler.service.ArtworkService;
-import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.crawler.model.Artwork;
 
 import java.io.IOException;
 import java.util.HashSet;

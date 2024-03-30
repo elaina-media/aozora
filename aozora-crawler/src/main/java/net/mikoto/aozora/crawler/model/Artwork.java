@@ -1,4 +1,4 @@
-package net.mikoto.aozora.model;
+package net.mikoto.aozora.crawler.model;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;

@@ -1,7 +1,7 @@
 package net.mikoto.aozora.crawler.service;
 
 import com.mybatisflex.core.service.IService;
-import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.crawler.model.Artwork;
 
 /**
  * @author mikoto

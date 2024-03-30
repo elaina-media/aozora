@@ -1,7 +1,7 @@
 package net.mikoto.aozora.crawler.mapper;
 
 import com.mybatisflex.core.BaseMapper;
-import net.mikoto.aozora.model.Artwork;
+import net.mikoto.aozora.crawler.model.Artwork;
 
 /**
  * @author mikoto
