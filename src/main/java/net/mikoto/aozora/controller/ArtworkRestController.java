@@ -101,12 +101,4 @@ public class ArtworkRestController {
 
         return result;
     }
-
-    @RequestMapping("/getCps")
-    public JSONObject getCps(@RequestParam String key, @RequestParam String lang) {
-        JSONObject result = new JSONObject();
-        result.put("body", artworkService.getExtensionTags(key, lang));
-        return result;
-    }
-
 }
