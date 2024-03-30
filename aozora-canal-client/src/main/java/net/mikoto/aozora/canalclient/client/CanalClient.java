@@ -1,13 +1,9 @@
 package net.mikoto.aozora.canalclient.client;
 
 import lombok.extern.java.Log;
-import net.mikoto.aozora.canalclient.model.Config;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.net.InetSocketAddress;
-import java.util.*;
 
 /**
  * @author mikoto

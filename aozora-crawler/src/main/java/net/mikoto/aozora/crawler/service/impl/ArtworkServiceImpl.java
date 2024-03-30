@@ -8,8 +8,8 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.crawler.client.PixivClient;
 import net.mikoto.aozora.crawler.mapper.ArtworkMapper;
-import net.mikoto.aozora.crawler.service.ArtworkService;
 import net.mikoto.aozora.crawler.model.Artwork;
+import net.mikoto.aozora.crawler.service.ArtworkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

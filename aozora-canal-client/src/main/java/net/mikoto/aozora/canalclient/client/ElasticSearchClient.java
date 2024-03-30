@@ -1,7 +1,6 @@
 package net.mikoto.aozora.canalclient.client;
 
 import com.dtflys.forest.annotation.BaseRequest;
-import com.dtflys.forest.annotation.ForestClient;
 import com.dtflys.forest.annotation.JSONBody;
 import com.dtflys.forest.annotation.Post;
 import net.mikoto.aozora.canalclient.model.ArtworkIndex;

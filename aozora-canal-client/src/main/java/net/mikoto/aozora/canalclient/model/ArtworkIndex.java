@@ -2,7 +2,6 @@ package net.mikoto.aozora.canalclient.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
