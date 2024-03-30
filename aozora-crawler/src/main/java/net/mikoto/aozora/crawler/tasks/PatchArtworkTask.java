@@ -35,14 +35,6 @@ public class PatchArtworkTask implements Runnable, Observer {
     private final int cacheSize;
     private final int delay;
 
-    private long startTime;
-    private int totalQps;
-
-    private int currentQps;
-    private int currentGetCount;
-    private long currentStartTime;
-    private long currentLastGetTime;
-
     public PatchArtworkTask(String beginningArtwork, String endingArtwork, String cacheSize, String delay) {
         this.beginningArtwork = Integer.parseInt(beginningArtwork);
         this.endingArtwork = Integer.parseInt(endingArtwork);
@@ -53,9 +45,7 @@ public class PatchArtworkTask implements Runnable, Observer {
     @SneakyThrows
     @Override
     public void run() {
-        startTime = System.currentTimeMillis();
-        currentStartTime = startTime;
-
+        long lastUpdateTime = System.currentTimeMillis();
         while (beginningArtwork + doneWorkCount <= endingArtwork) {
             int artworkId = beginningArtwork + doneWorkCount;
             Artwork artwork = doGetArtwork(artworkId);
@@ -92,27 +82,18 @@ public class PatchArtworkTask implements Runnable, Observer {
                 System.out.println("        占比：" + (((double) totalNotNullWorkCount / (double) doneWorkCount) * 100) + "%");
                 System.out.println("    总无效作业数：" + totalNullWorkCount);
                 System.out.println("        占比：" + (((double) totalNullWorkCount / (double) doneWorkCount) * 100) + "%");
-                System.out.println("    缓内作业数：" + (notNullWorkCount + nullWorkCount));
-                System.out.println("    缓内有效作业数：" + notNullWorkCount);
+                System.out.println("    缓内作业数：" + (notNullWorkCount + nullWorkCount) + " 速度：" + (double) (notNullWorkCount + nullWorkCount) / (System.currentTimeMillis() - lastUpdateTime) + "/s");
+                System.out.println("    缓内有效作业数：" + notNullWorkCount + " 速度：" + (double) (notNullWorkCount) / (System.currentTimeMillis() - lastUpdateTime) + "/s");
                 System.out.println("        占比：" + (((double) notNullWorkCount / (double) (notNullWorkCount + nullWorkCount)) * 100) + "%");
-                System.out.println("    缓内无效作业数：" + nullWorkCount);
+                System.out.println("    缓内无效作业数：" + nullWorkCount + " 速度：" + (double) (nullWorkCount) / (System.currentTimeMillis() - lastUpdateTime) + "/s");
                 System.out.println("        占比：" + (((double) nullWorkCount / (double) (notNullWorkCount + nullWorkCount)) * 100) + "%");
                 System.out.println();
 
                 // 计数器刷新：有效/无效作业
                 notNullWorkCount = 0;
                 nullWorkCount = 0;
+                lastUpdateTime = System.currentTimeMillis();
             }
-
-            currentLastGetTime = System.currentTimeMillis();
-            currentGetCount++;
-            if (currentLastGetTime - startTime > 1000) {
-                currentQps = currentGetCount + 1;
-                currentStartTime = currentLastGetTime;
-                currentGetCount = 0;
-            }
-
-            totalQps = doneWorkCount;
 
             Thread.sleep(delay);
         }
