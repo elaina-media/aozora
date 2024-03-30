@@ -1,22 +1,14 @@
 package net.mikoto.aozora.service.impl;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.dtflys.forest.exceptions.ForestNetworkException;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.CacheableServiceImpl;
-import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import net.mikoto.aozora.client.PixivClient;
-import net.mikoto.aozora.mapper.ArtworkMapper;
 import net.mikoto.aozora.model.Artwork;
-import net.mikoto.aozora.service.ArtworkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
