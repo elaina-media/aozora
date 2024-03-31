@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.mikoto.aozora.service.ArtworkService;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -18,6 +19,7 @@ import java.io.IOException;
 @Component
 public class ArtworkImageFilter implements HandlerInterceptor {
     @Resource
+    @Qualifier("CachedArtworkService")
     private ArtworkService artworkService;
 
     @Override
