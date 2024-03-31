@@ -30,7 +30,7 @@ public class AozoraApplication implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(@NotNull InterceptorRegistry registry) {
 		registry.addInterceptor(artworkImageFilter)
-				.addPathPatterns("/api/artwork/getImage/**");
+				.addPathPatterns("/pixiv/artwork/getImage/**");
 
 		registry.addInterceptor(corsFilter)
 				.addPathPatterns("/**");

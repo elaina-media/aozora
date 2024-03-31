@@ -24,7 +24,7 @@ public class ArtworkImageFilter implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws IOException {
-        String url = request.getServletPath().replace("/api/artwork/getImage", "");
+        String url = request.getServletPath().replace("/pixiv/artwork/getImage", "");
         byte[] image = artworkService.getImage(url);
         response.setContentType("image/png;image/jpeg;");
         response.getOutputStream().write(image);
