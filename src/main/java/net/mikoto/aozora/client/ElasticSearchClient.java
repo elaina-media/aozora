@@ -12,17 +12,14 @@ import org.springframework.stereotype.Component;
  * Create for aozora
  */
 @Component
-@BaseRequest(
-        baseURL = "http://192.168.123.90:9200/aozora"
-)
 public interface ElasticSearchClient {
     @Post(
-            "_search"
+            "http://192.168.123.90:9200/aozora/_search"
     )
     String search(@JSONBody String searchJson);
 
     @Get(
-          "_cat/count/aozora"
+          "http://192.168.123.90:9200/_cat/count/aozora"
     )
     String getCount();
 }
