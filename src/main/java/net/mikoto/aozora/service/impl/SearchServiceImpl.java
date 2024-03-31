@@ -143,6 +143,6 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public int artworkCount() {
-        return Integer.parseInt(elasticSearchClient.getCount().split(" ")[2]);
+        return Integer.parseInt(elasticSearchClient.getCount().split(" ")[2].replace("\n", ""));
     }
 }
