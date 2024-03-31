@@ -22,6 +22,61 @@ public class SearchServiceImpl implements SearchService {
     public SearchServiceImpl(ElasticSearchClient elasticSearchClient) {
         this.elasticSearchClient = elasticSearchClient;
     }
+
+    private List<Integer> nullableSearch(
+            int grading,
+            boolean isAi,
+            boolean isManga,
+            String ordering,
+            String orderingBy,
+            int size,
+            int page
+    ) {
+        JSONObject searchJson = new JSONObject();
+        searchJson.fluentPut("from", size * (page - 1));
+        searchJson.fluentPut("size", size);
+        searchJson.fluentPut("_source", "artworkId");
+
+        JSONObject queryJson = new JSONObject();
+        searchJson.fluentPut("query", queryJson);
+
+        JSONArray sortJson = new JSONArray();
+        searchJson.fluentPut("sort", sortJson);
+
+        JSONArray filterJson = new JSONArray();
+        JSONObject boolJson = new JSONObject();
+
+        queryJson.fluentPut("bool", boolJson);
+        boolJson.fluentPut("filter", filterJson);
+
+        filterJson.fluentAdd(
+                new JSONObject()
+                        .fluentPut("range", new JSONObject()
+                                .fluentPut("grading", new JSONObject().fluentPut("lte", grading))
+                        )
+        );
+        filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("ai", isAi)));
+        filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("manga", isManga)));
+
+        sortJson.fluentAdd(
+                new JSONObject()
+                        .fluentPut(
+                                orderingBy, new JSONObject()
+                                        .fluentPut("order", ordering)
+                        )
+        );
+
+        List<Integer> artworkIds = new ArrayList<>();
+        JSONObject searchResultJson = JSONObject.parseObject(elasticSearchClient.search(searchJson.toJSONString()));
+        JSONArray hits = searchResultJson.getJSONObject("hits").getJSONArray("hits");
+        for (int i = 0; i < hits.size(); i++) {
+            JSONObject hit = hits.getJSONObject(i);
+            artworkIds.add(hit.getJSONObject("_source").getIntValue("artworkId"));
+        }
+        return artworkIds;
+    }
+
+    @Override
     @SneakyThrows
     public List<Integer> search(
             String query,
@@ -33,6 +88,9 @@ public class SearchServiceImpl implements SearchService {
             int size,
             int page
     ) {
+        if ("$NULL".equals(query)) {
+            return nullableSearch(grading, isAi, isManga, ordering, orderingBy, size, page);
+        }
         JSONObject searchJson = new JSONObject();
         searchJson.fluentPut("from", size * (page - 1));
         searchJson.fluentPut("size", size);
