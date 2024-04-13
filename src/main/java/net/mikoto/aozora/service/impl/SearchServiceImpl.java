@@ -15,6 +15,7 @@ import java.util.List;
  * &#064;date 2024/3/27
  * Create for aozora
  */
+@SuppressWarnings("DuplicatedCode")
 @Service
 public class SearchServiceImpl implements SearchService {
     private final ElasticSearchClient elasticSearchClient;
@@ -55,8 +56,12 @@ public class SearchServiceImpl implements SearchService {
                                 .fluentPut("grading", new JSONObject().fluentPut("lte", grading))
                         )
         );
-        filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("ai", isAi)));
-        filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("manga", isManga)));
+        if (isAi) {
+            filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("ai", false)));
+        }
+        if (isManga) {
+            filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("manga", false)));
+        }
 
         sortJson.fluentAdd(
                 new JSONObject()
@@ -120,8 +125,12 @@ public class SearchServiceImpl implements SearchService {
                                 .fluentPut("grading", new JSONObject().fluentPut("lte", grading))
                         )
         );
-        filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("ai", isAi)));
-        filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("manga", isManga)));
+        if (isAi) {
+            filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("ai", false)));
+        }
+        if (isManga) {
+            filterJson.fluentAdd(new JSONObject().fluentPut("match", new JSONObject().fluentPut("manga", false)));
+        }
 
         sortJson.fluentAdd(
                 new JSONObject()

@@ -136,11 +136,11 @@ Content-Type: application/json
       },
         {
           "match": {
-            "ai": false
+            "ai": true
           }
         },{
           "match": {
-            "manga": false
+            "manga": true
           }
         }
       ],
