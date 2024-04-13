@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 @NacosConfigurationProperties(
-        dataId = "forward_client",
+        dataId = "forward_client_2",
         type = ConfigType.JSON,
         autoRefreshed = true
 )

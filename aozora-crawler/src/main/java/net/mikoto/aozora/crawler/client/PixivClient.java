@@ -2,6 +2,7 @@ package net.mikoto.aozora.crawler.client;
 
 import com.dtflys.forest.annotation.BaseRequest;
 import com.dtflys.forest.annotation.Get;
+import com.dtflys.forest.annotation.HTTPProxy;
 import com.dtflys.forest.annotation.Var;
 import net.mikoto.aozora.crawler.client.interceptor.CookieInterceptor;
 import net.mikoto.aozora.crawler.client.interceptor.CpsVersionInterceptor;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @BaseRequest(baseURL = "https://www.pixiv.net")
+@HTTPProxy(host = "127.0.0.1", port = "7891")
 public interface PixivClient {
     @Get(
             url = "/ajax/illust/{artworkId}",
