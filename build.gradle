@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.mikoto'
-version = '0.0.2.240326_RC'
+version = '0.0.3.240414_RC'
 
 java {
 		sourceCompatibility = '17'
