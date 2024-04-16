@@ -320,13 +320,9 @@
     loadImage()
 
     window.onscroll = function() {
-        if($(window).scrollTop() + $(window).height() >= $(document).height()){
+        if($(window).scrollTop() + $(window).height() >= $(document).height() - 500){
             loadImage()
         }
-    }
-
-    window.onresize = function () {
-
     }
 </script>
 
